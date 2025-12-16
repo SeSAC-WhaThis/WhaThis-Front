@@ -1,7 +1,7 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 
-export default function basicMenus() {
+export default function RootMenus() {
   return (
     <nav id="navbar" className=" flex bg-blue-300">
       <div className="w-4/5 bg-gray-500">
