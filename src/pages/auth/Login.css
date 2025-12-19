@@ -1,0 +1,129 @@
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f9fafb;
+}
+
+.login-wrapper {
+  width: 100%;
+  max-width: 400px;
+  padding: 40px 20px;
+  background-color: white;
+  border-radius: 8px; /* Optional: adds rounded corners like a card */
+  /* box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); */ /* Optional: adds shadow */
+}
+
+.login-title {
+  font-size: 32px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 30px;
+  color: #333;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.login-input {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 15px;
+  box-sizing: border-box; /* Ensures padding doesn't affect width */
+}
+
+.login-input:focus {
+  border-color: #00c4c4; /* Wadiz-like teal color */
+  outline: none;
+}
+
+.login-button.primary {
+  width: 100%;
+  padding: 16px;
+  background-color: #00c4c4; /* Wadiz-like teal color */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.login-button.primary:hover {
+  background-color: #00a0a0;
+}
+
+.login-options {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  font-size: 13px;
+  color: #666;
+}
+
+.login-options a {
+  text-decoration: none;
+  color: #666;
+}
+
+.login-options .divider {
+  margin: 0 10px;
+  color: #ccc;
+}
+
+.social-login {
+  margin-top: 40px;
+  text-align: center;
+}
+
+.social-login-text {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 15px;
+  position: relative;
+}
+
+.social-login-text::before,
+.social-login-text::after {
+  content: "";
+  display: inline-block;
+  width: 30%;
+  height: 1px;
+  background-color: #eee;
+  vertical-align: middle;
+  margin: 0 10px;
+}
+
+.social-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.social-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid #eee;
+  background-color: white;
+  cursor: pointer;
+  font-size: 0; /* Hide text, use background image normally */
+  background-size: 24px;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* Placeholder styles for social buttons - replace with actual icons */
+.social-btn.kakao { background-color: #fee500; border-color: #fee500; }
+.social-btn.naver { background-color: #03c75a; border-color: #03c75a; }
+.social-btn.google { border-color: #ddd; }
+.social-btn.apple { background-color: black; border-color: black; }
+
