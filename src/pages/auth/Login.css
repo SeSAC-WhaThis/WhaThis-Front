@@ -3,20 +3,23 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #f9fafb;
+  background-color: white;
+  flex-direction: column;
 }
 
 .login-wrapper {
   width: 100%;
-  max-width: 400px;
-  padding: 40px 20px;
+  max-width: 560px;
+  border: 1px solid #f2f4f6;
+  border-radius: 16px;
+  padding: 40px 48px;
   background-color: white;
   border-radius: 8px; /* Optional: adds rounded corners like a card */
   /* box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); */ /* Optional: adds shadow */
 }
 
 .login-title {
-  font-size: 32px;
+  font-size: 42px;
   font-weight: bold;
   text-align: center;
   margin-bottom: 30px;
@@ -95,9 +98,9 @@
 .social-login-text::after {
   content: "";
   display: inline-block;
-  width: 30%;
-  height: 1px;
-  background-color: #eee;
+  width: 25%;
+  height: 0.5px;
+  background-color: #e6e6e6;
   vertical-align: middle;
   margin: 0 10px;
 }
@@ -105,7 +108,8 @@
 .social-buttons {
   display: flex;
   justify-content: center;
-  gap: 15px;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .social-btn {
@@ -122,8 +126,79 @@
 }
 
 /* Placeholder styles for social buttons - replace with actual icons */
-.social-btn.kakao { background-color: #fee500; border-color: #fee500; }
-.social-btn.naver { background-color: #03c75a; border-color: #03c75a; }
-.social-btn.google { border-color: #ddd; }
-.social-btn.apple { background-color: black; border-color: black; }
+.social-btn.kakao {
+  background-color: #fee500;
+  border-color: #fee500;
+}
+.social-btn.naver {
+  background-color: #03c75a;
+  border-color: #03c75a;
+}
+.social-btn.google {
+  border-color: #ddd;
+}
+.social-btn.apple {
+  background-color: black;
+  border-color: black;
+}
 
+.social-img-btn {
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 56px;
+}
+
+.social-img-btn img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+}
+
+.social-text-btn {
+  width: 100%;
+  height: 56px;
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.social-text-btn img {
+  position: absolute;
+  left: 16px;
+  width: 24px;
+  height: 24px;
+}
+
+.social-text-btn span {
+  font-size: 15px;
+  color: #333;
+  font-weight: 500;
+}
+
+.social-text-btn.kakao {
+  background-color: #fee500;
+  border-color: #fee500;
+}
+
+.social-text-btn.kakao span {
+  color: #3c1e1e;
+}
+
+.social-text-btn.naver {
+  background-color: #03a94d;
+  border-color: #03a94d;
+}
+
+.social-text-btn.naver span {
+  color: white;
+}
