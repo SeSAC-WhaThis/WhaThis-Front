@@ -23,12 +23,6 @@ export default function RootMenus() {
           <li className="pr-6 text-2xl">
             <NavLink to={PATH.MAIN}>Main</NavLink>
           </li>
-          <li className="pr-6 text-2xl">
-            <NavLink to={PATH.ABOUT}>About</NavLink>
-          </li>
-          <li className="pr-6 text-2xl">
-            <NavLink to={PATH.TODO}>Todo</NavLink>
-          </li>
         </ul>
       </div>
       <div className="pr-6 text-white font-bold">

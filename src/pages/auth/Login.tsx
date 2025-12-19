@@ -6,7 +6,7 @@ import "./Login.css";
 import kakaoLoginImg from "../../assets/icons/kakao.png";
 import naverLoginImg from "../../assets/icons/naver.png";
 import googleIcon from "../../assets/icons/google.png";
-import { loginKakao } from "../../store/authSlice";
+import { loginKakao, clearError } from "../../store/authSlice";
 import { PATH } from "../../constants/path";
 
 const Login = () => {
@@ -35,9 +35,9 @@ const Login = () => {
     // Handle login logic here
     console.log("Login attempt:", email, password);
   };
-
+  
   // 로그인 상태 변경 감지 및 처리
-  useEffect(() => {
+  useEffect(() => { 
     if (isAuthenticated && user) {
       console.log("로그인 성공! Redux 상태가 변경되었습니다.", user);
       alert(`로그인 성공! 환영합니다 ${user.nickname}님.`);
@@ -45,8 +45,9 @@ const Login = () => {
     }
     if (error) {
       alert("로그인 실패: " + error);
+      dispatch(clearError()); // 알림 확인 후 에러 초기화
     }
-  }, [isAuthenticated, user, error, navigate]);
+  }, [isAuthenticated, user, error, navigate, dispatch]);
 
   const handleKakaoLogin = () => {
     // @ts-ignore: Thunk 액션 디스패치 타입 호환성 문제 방지

@@ -1,11 +1,15 @@
 import Login from "../../pages/auth/Login";
-import PATHS from "../../constants/paths";
-import { Component } from "react";
+import KakaoCallback from "../../pages/auth/KakaoCallback";
+import { PATH } from "../../constants/path";
 
 const authRoutes = [
   {
-    path: PATHS.AUTH.LOGIN,
+    path: PATH.LOGIN,
     Component: Login,
+  },
+  {
+    path: PATH.KAKAO_CALLBACK,
+    Component: KakaoCallback,
   },
 ];
 
