@@ -1,20 +1,25 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 // Assuming styled-components is available, or will use standard CSS/modules if preferred. Using standard CSS for now to be safe with existing setup.
 import "./Login.css";
 import kakaoLoginImg from "../../assets/icons/kakao.png";
 import naverLoginImg from "../../assets/icons/naver.png";
 import googleIcon from "../../assets/icons/google.png";
 import { loginKakao } from "../../store/authSlice";
+import { PATH } from "../../constants/path";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState("");
+  const navigate = useNavigate();
 
   const dispatch = useDispatch();
   // @ts-ignore: JS 파일인 store/index.js의 타입을 추론하지 못할 경우를 대비해 임시로 무시하거나 RootState 타입을 정의해야 합니다.
-  const { loading } = useSelector((state: any) => state.auth);
+  const { loading, isAuthenticated, user, error } = useSelector(
+    (state: any) => state.auth
+  );
 
   const validateEmail = (email: string) => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -30,6 +35,18 @@ const Login = () => {
     // Handle login logic here
     console.log("Login attempt:", email, password);
   };
+
+  // 로그인 상태 변경 감지 및 처리
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      console.log("로그인 성공! Redux 상태가 변경되었습니다.", user);
+      alert(`로그인 성공! 환영합니다 ${user.nickname}님.`);
+      navigate(PATH.MAIN); // 메인 페이지로 이동
+    }
+    if (error) {
+      alert("로그인 실패: " + error);
+    }
+  }, [isAuthenticated, user, error, navigate]);
 
   const handleKakaoLogin = () => {
     // @ts-ignore: Thunk 액션 디스패치 타입 호환성 문제 방지
