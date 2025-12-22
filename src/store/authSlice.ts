@@ -3,9 +3,8 @@ import axios from "axios";
 import axiosInstance from "../api/axiosInstance";
 
 // 환경 변수 및 상수 정의 (타입 단언 사용)
-const REST_API_KEY = import.meta.env.VITE_KAKAO_CLIENT_SECRET as string;
+const KAKAO_CLIENT_ID = import.meta.env.VITE_KAKAO_CLIENT_SECRET as string;
 const REDIRECT_URI = import.meta.env.VITE_KAKAO_REDIRECT_URI as string;
-const API_BASE_URL = import.meta.env.VITE_API_URL as string;
 
 // 사용자 정보 타입 정의
 export interface User {
@@ -43,14 +42,14 @@ export const loginKakao = createAsyncThunk(
   "auth/loginKakao",
   async (_, { rejectWithValue }) => {
     try {
-      if (!REST_API_KEY || !REDIRECT_URI) {
+      if (!KAKAO_CLIENT_ID || !REDIRECT_URI) {
         throw new Error(
           "환경 변수(VITE_KAKAO_CLIENT_SECRET, VITE_KAKAO_REDIRECT_URI)가 설정되지 않았습니다."
         );
       }
 
       // 카카오 인가 코드 요청 URL 생성
-      const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${REST_API_KEY}&redirect_uri=${REDIRECT_URI}&response_type=code`;
+      const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code`;
       // 카카오 로그인 페이지로 이동
       window.location.href = kakaoAuthUrl;
     } catch (error: any) {
@@ -67,7 +66,7 @@ export const getKakaoToken = createAsyncThunk<
   { rejectValue: string }
 >("auth/getKakaoToken", async (code, { rejectWithValue }) => {
   try {
-    if (!REST_API_KEY || !REDIRECT_URI) {
+    if (!KAKAO_CLIENT_ID || !REDIRECT_URI) {
       throw new Error(
         "환경 변수(VITE_KAKAO_CLIENT_SECRET, VITE_KAKAO_REDIRECT_URI)가 설정되지 않았습니다."
       );
@@ -75,7 +74,7 @@ export const getKakaoToken = createAsyncThunk<
 
     const params = new URLSearchParams({
       grant_type: "authorization_code",
-      client_id: REST_API_KEY,
+      client_id: KAKAO_CLIENT_ID,
       redirect_uri: REDIRECT_URI,
       code,
     });
@@ -94,9 +93,10 @@ export const getKakaoToken = createAsyncThunk<
     const tokenData = tokenResponse.data;
 
     // 2. 백엔드 서버로 액세스 토큰 전송하여 로그인/회원가입 처리
-    const backendResponse = await axios.post(`${API_BASE_URL}/api/auth/kakao`, {
-      accessToken: tokenData.access_token,
-    });
+    const backendResponse = await axiosInstance.post<AuthResponse>(
+      "/api/auth/kakao",
+      { accessToken: tokenData.access_token }
+    );
 
     const backendData = backendResponse.data;
 
