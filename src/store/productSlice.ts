@@ -18,24 +18,8 @@ export interface Product {
 export const fetchFundingProducts = createAsyncThunk<Product[]>(
   "products/fetchFundingProducts",
   async () => {
-    // 테스트를 위해 실제 API 호출은 주석 처리하고 더미 데이터를 반환합니다.
-    // const response = await axios.get("/api/products/funding");
-    // return response.data;
-
-    return [
-      {
-        id: 1,
-        title: "친환경 대나무 텀블러",
-        thumbnailImageUrl:
-          "https://www.gifco.co.kr/img_model/600_1/005001001165a.jpg",
-        startDate: "2025-03-01",
-        endDate: "2025-03-31",
-        goalAmount: 5000000,
-        currentAmount: 1850000,
-        seller: "그린라이프",
-        category: "생활용품",
-      },
-    ];
+    const response = await axios.get("/products");
+    return response.data;
   }
 );
 
