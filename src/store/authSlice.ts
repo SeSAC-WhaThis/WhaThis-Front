@@ -1,0 +1,220 @@
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import axios from "axios";
+
+// 환경 변수 및 상수 정의 (타입 단언 사용)
+const REST_API_KEY = import.meta.env.VITE_KAKAO_CLIENT_SECRET as string;
+const REDIRECT_URI = import.meta.env.VITE_KAKAO_REDIRECT_URI as string;
+const API_BASE_URL = import.meta.env.VITE_API_URL as string;
+
+// 사용자 정보 타입 정의
+export interface User {
+  id: number;
+  email: string;
+  name: string;
+  [key: string]: any; // 추가 필드 허용
+}
+
+// 로그인/회원가입 응답 타입
+interface AuthResponse {
+  user: User;
+  token: string;
+}
+
+// 초기 상태 타입 정의
+interface AuthState {
+  user: User | null;
+  token: string | null;
+  isAuthenticated: boolean;
+  loading: boolean;
+  error: string | null | undefined;
+}
+
+const initialState: AuthState = {
+  user: null,
+  token: null,
+  isAuthenticated: false,
+  loading: false,
+  error: null,
+};
+
+// 카카오 로그인 비동기 액션 (Thunk)
+export const loginKakao = createAsyncThunk(
+  "auth/loginKakao",
+  async (_, { rejectWithValue }) => {
+    try {
+      if (!REST_API_KEY || !REDIRECT_URI) {
+        throw new Error(
+          "환경 변수(VITE_KAKAO_CLIENT_SECRET, VITE_KAKAO_REDIRECT_URI)가 설정되지 않았습니다."
+        );
+      }
+
+      // 카카오 인가 코드 요청 URL 생성
+      const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${REST_API_KEY}&redirect_uri=${REDIRECT_URI}&response_type=code`;
+      // 카카오 로그인 페이지로 이동
+      window.location.href = kakaoAuthUrl;
+    } catch (error: any) {
+      console.error(error);
+      return rejectWithValue(error.message || "카카오 로그인 실패");
+    }
+  }
+);
+
+// 카카오 인가 코드로 토큰 및 사용자 정보 가져오기
+export const getKakaoToken = createAsyncThunk<
+  AuthResponse,
+  string,
+  { rejectValue: string }
+>("auth/getKakaoToken", async (code, { rejectWithValue }) => {
+  try {
+    if (!REST_API_KEY || !REDIRECT_URI) {
+      throw new Error(
+        "환경 변수(VITE_KAKAO_CLIENT_SECRET, VITE_KAKAO_REDIRECT_URI)가 설정되지 않았습니다."
+      );
+    }
+
+    const params = new URLSearchParams({
+      grant_type: "authorization_code",
+      client_id: REST_API_KEY,
+      redirect_uri: REDIRECT_URI,
+      code,
+    });
+
+    // 1. 인가 코드로 액세스 토큰 요청
+    const tokenResponse = await axios.post(
+      "https://kauth.kakao.com/oauth/token",
+      params,
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
+        },
+      }
+    );
+
+    const tokenData = tokenResponse.data;
+
+    // 2. 백엔드 서버로 액세스 토큰 전송하여 로그인/회원가입 처리
+    const backendResponse = await axios.post(`${API_BASE_URL}/api/auth/kakao`, {
+      accessToken: tokenData.access_token,
+    });
+
+    const backendData = backendResponse.data;
+
+    // 백엔드에서 { user: {...}, token: "..." } 형태로 반환한다고 가정
+    return backendData as AuthResponse;
+  } catch (error: any) {
+    console.error(error);
+    return rejectWithValue(error.message);
+  }
+});
+
+// 일반 로그인 비동기 액션
+export const login = createAsyncThunk<
+  AuthResponse,
+  any,
+  { rejectValue: string }
+>("auth/login", async (userData, { rejectWithValue }) => {
+  try {
+    const response = await axios.post(
+      `${API_BASE_URL}/api/auth/login`,
+      userData
+    );
+    const data = response.data;
+    return data as AuthResponse;
+  } catch (error: any) {
+    return rejectWithValue(error.message);
+  }
+});
+
+// 회원가입 비동기 액션
+export const signup = createAsyncThunk<any, any, { rejectValue: string }>(
+  "auth/signup",
+  async (userData, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/api/auth/signup`,
+        userData
+      );
+      const data = response.data;
+      return data;
+    } catch (error: any) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+const authSlice = createSlice({
+  name: "auth",
+  initialState,
+  reducers: {
+    logout: (state) => {
+      state.user = null;
+      state.token = null;
+      state.isAuthenticated = false;
+    },
+    clearError: (state) => {
+      state.error = null;
+    },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(loginKakao.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(loginKakao.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(loginKakao.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(getKakaoToken.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(
+        getKakaoToken.fulfilled,
+        (state, action: PayloadAction<AuthResponse>) => {
+          state.loading = false;
+          state.isAuthenticated = true;
+          state.user = action.payload.user;
+          state.token = action.payload.token;
+        }
+      )
+      .addCase(getKakaoToken.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(signup.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(signup.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(signup.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(login.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(
+        login.fulfilled,
+        (state, action: PayloadAction<AuthResponse>) => {
+          state.loading = false;
+          state.isAuthenticated = true;
+          state.user = action.payload.user;
+          state.token = action.payload.token;
+        }
+      )
+      .addCase(login.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
+  },
+});
+
+export const { logout, clearError } = authSlice.actions;
+export default authSlice.reducer;

@@ -1,18 +1,27 @@
 import RootLayout from "../../layout/RootLayout";
 import MyPage from "../../pages/auth/MyPage";
-import PATHS from "../../constants/paths";
+import FundingPage from "../../pages/products/FundingPage";
+import PreorderPage from "../../pages/products/PreorderPage";
+import { PATH } from "../../constants/path";
 import { Component } from "react";
 
 const rootRoutes = [
   {
-    path: PATHS.INDEX,
+    path: PATH.MAIN,
     Component: RootLayout,
     children: [
       {
-        path: PATHS.MY_PAGE,
+        path: PATH.MY_PAGE,
         Component: MyPage,
       },
-      // 다른 메인 페이지 라우트들을 여기에 추가
+      {
+        path: PATH.PRODUCT.FUNDINGPAGE,
+        Component: FundingPage,
+      },
+      {
+        path: PATH.PRODUCT.PREORDERPAGE,
+        Component: PreorderPage,
+      },
     ],
   },
 ];
