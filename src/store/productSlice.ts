@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
+import axiosInstance from "../api/axiosInstance";
 
 // Product 타입
 export interface Product {
@@ -18,7 +18,7 @@ export interface Product {
 export const fetchFundingProducts = createAsyncThunk<Product[]>(
   "products/fetchFundingProducts",
   async () => {
-    const response = await axios.get("/products");
+    const response = await axiosInstance.get("/products");
     return response.data;
   }
 );
