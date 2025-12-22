@@ -27,7 +27,7 @@ export default function RootMenus() {
       </div>
       <div className="pr-6 text-white font-bold">
         {!isAuthenticated ? (
-          <NavLink to={PATH.LOGIN} className="text-2xl">
+          <NavLink to={PATH.AUTH.LOGIN} className="text-2xl">
             Login
           </NavLink>
         ) : (

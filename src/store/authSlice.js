@@ -1,16 +1,18 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
+// 환경 변수 및 상수 정의
+const REST_API_KEY = import.meta.env.VITE_KAKAO_CLIENT_SECRET;
+const REDIRECT_URI = import.meta.env.VITE_KAKAO_REDIRECT_URI;
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+
 // 카카오 로그인 비동기 액션 (Thunk)
 export const loginKakao = createAsyncThunk(
   "auth/loginKakao",
   async (_, { rejectWithValue }) => {
     try {
-      const REST_API_KEY = import.meta.env.VITE_KAKAO_CLIENT_SECRET;
-      const REDIRECT_URI = import.meta.env.VITE_KAKAO_REDIRECT_URI;
-
       if (!REST_API_KEY || !REDIRECT_URI) {
         throw new Error(
-          "환경 변수(VITE_KAKAO_CLIENT_ID, VITE_KAKAO_REDIRECT_URI)가 설정되지 않았습니다."
+          "환경 변수(VITE_KAKAO_CLIENT_SECRET, VITE_KAKAO_REDIRECT_URI)가 설정되지 않았습니다."
         );
       }
 
@@ -30,13 +32,9 @@ export const getKakaoToken = createAsyncThunk(
   "auth/getKakaoToken",
   async (code, { rejectWithValue }) => {
     try {
-      const REST_API_KEY = import.meta.env.VITE_KAKAO_CLIENT_ID;
-      const REDIRECT_URI = import.meta.env.VITE_KAKAO_REDIRECT_URI;
-      const CLIENT_SECRET = import.meta.env.VITE_KAKAO_CLIENT_SECRET;
-
       if (!REST_API_KEY || !REDIRECT_URI) {
         throw new Error(
-          "환경 변수(VITE_KAKAO_CLIENT_ID, VITE_KAKAO_REDIRECT_URI)가 설정되지 않았습니다."
+          "환경 변수(VITE_KAKAO_CLIENT_SECRET, VITE_KAKAO_REDIRECT_URI)가 설정되지 않았습니다."
         );
       }
 
@@ -46,10 +44,6 @@ export const getKakaoToken = createAsyncThunk(
         redirect_uri: REDIRECT_URI,
         code,
       });
-
-      if (CLIENT_SECRET) {
-        params.append("client_secret", CLIENT_SECRET);
-      }
 
       // 1. 인가 코드로 액세스 토큰 요청
       const tokenResponse = await fetch("https://kauth.kakao.com/oauth/token", {
@@ -66,9 +60,6 @@ export const getKakaoToken = createAsyncThunk(
 
       // 2. 백엔드 서버로 액세스 토큰 전송하여 로그인/회원가입 처리
       // (백엔드 API 주소는 환경 변수 VITE_API_URL로 관리하는 것을 권장합니다)
-      const API_BASE_URL =
-        import.meta.env.VITE_API_URL || "http://localhost:8080";
-
       const backendResponse = await fetch(`${API_BASE_URL}/api/auth/kakao`, {
         method: "POST",
         headers: {
@@ -87,6 +78,55 @@ export const getKakaoToken = createAsyncThunk(
       return backendData;
     } catch (error) {
       console.error(error);
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// 일반 로그인 비동기 액션
+export const login = createAsyncThunk(
+  "auth/login",
+  async (userData, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(userData),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || "로그인 실패");
+      }
+      // 백엔드에서 { user: {...}, token: "..." } 형태로 반환한다고 가정
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// 회원가입 비동기 액션
+export const signup = createAsyncThunk(
+  "auth/signup",
+  async (userData, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/signup`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(userData),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || "회원가입 실패");
+      }
+      return data;
+    } catch (error) {
       return rejectWithValue(error.message);
     }
   }
@@ -135,6 +175,31 @@ const authSlice = createSlice({
         state.token = action.payload.token; // JWT 토큰 저장
       })
       .addCase(getKakaoToken.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(signup.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(signup.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(signup.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(login.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(login.fulfilled, (state, action) => {
+        state.loading = false;
+        state.isAuthenticated = true;
+        state.user = action.payload.user;
+        state.token = action.payload.token; // 일반 로그인 토큰 저장
+      })
+      .addCase(login.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

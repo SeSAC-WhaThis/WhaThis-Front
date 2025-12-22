@@ -24,7 +24,7 @@ const KakaoCallback = () => {
         } else {
           // 실패 시 로그인 페이지로 이동
           alert("카카오 로그인 실패");
-          navigate(PATH.LOGIN);
+          navigate(PATH.AUTH.LOGIN);
         }
       });
     }

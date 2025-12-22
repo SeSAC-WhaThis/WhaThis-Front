@@ -2,6 +2,9 @@ export const PATH = {
   MAIN: "/",
   ABOUT: "/about",
   TODO: "/todo/",
-  LOGIN: "/auth/login",
-  KAKAO_CALLBACK: "/oauth/kakao/callback",
+  AUTH: {
+    LOGIN: "/auth/login",
+    KAKAO_CALLBACK: "/oauth/kakao/callback",
+    SIGNUP: "/auth/signup",
+  },
 } as const;

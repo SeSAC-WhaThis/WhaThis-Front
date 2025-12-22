@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, NavLink } from "react-router-dom";
 // Assuming styled-components is available, or will use standard CSS/modules if preferred. Using standard CSS for now to be safe with existing setup.
 import "./Login.css";
 import kakaoLoginImg from "../../assets/icons/kakao.png";
 import naverLoginImg from "../../assets/icons/naver.png";
 import googleIcon from "../../assets/icons/google.png";
-import { loginKakao, clearError } from "../../store/authSlice";
+import { loginKakao, clearError, login } from "../../store/authSlice";
 import { PATH } from "../../constants/path";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState("");
+  const [rememberEmail, setRememberEmail] = useState(false);
   const navigate = useNavigate();
 
   const dispatch = useDispatch();
@@ -26,18 +27,34 @@ const Login = () => {
     return regex.test(email);
   };
 
+  // 페이지 로드 시 저장된 이메일 불러오기
+  useEffect(() => {
+    const savedEmail = localStorage.getItem("savedEmail");
+    if (savedEmail) {
+      setEmail(savedEmail);
+      setRememberEmail(true);
+    }
+  }, []);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateEmail(email)) {
       setEmailError("이메일 형식이 올바르지 않습니다.");
       return;
     }
-    // Handle login logic here
-    console.log("Login attempt:", email, password);
+
+    if (rememberEmail) {
+      localStorage.setItem("savedEmail", email);
+    } else {
+      localStorage.removeItem("savedEmail");
+    }
+
+    // @ts-ignore
+    dispatch(login({ email, password }));
   };
-  
+
   // 로그인 상태 변경 감지 및 처리
-  useEffect(() => { 
+  useEffect(() => {
     if (isAuthenticated && user) {
       console.log("로그인 성공! Redux 상태가 변경되었습니다.", user);
       alert(`로그인 성공! 환영합니다 ${user.nickname}님.`);
@@ -56,7 +73,9 @@ const Login = () => {
 
   return (
     <div className="login-container">
-      <h1 className="login-title">whathis</h1>
+      <NavLink to={PATH.MAIN}>
+        <h1 className="login-title">whathis</h1>
+      </NavLink>
       <div className="login-wrapper">
         <form onSubmit={handleSubmit} className="login-form">
           <div className="input-group">
@@ -86,7 +105,18 @@ const Login = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="login-input"
+              disabled={loading}
             />
+          </div>
+          <div className="remember-email-container">
+            <label>
+              <input
+                type="checkbox"
+                checked={rememberEmail}
+                onChange={(e) => setRememberEmail(e.target.checked)}
+              />
+              <span>로그인 유지</span>
+            </label>
           </div>
           <button type="submit" className="login-button primary">
             로그인
@@ -94,11 +124,7 @@ const Login = () => {
         </form>
 
         <div className="login-options">
-          <a href="/find-id">아이디 찾기</a>
-          <span className="divider">|</span>
-          <a href="/find-pw">비밀번호 찾기</a>
-          <span className="divider">|</span>
-          <a href="/signup">회원가입</a>
+          <NavLink to={PATH.AUTH.SIGNUP}>회원가입</NavLink>
         </div>
 
         <div className="social-login">
