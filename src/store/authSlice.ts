@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import axios from "axios";
+import axiosInstance from "../api/axiosInstance";
 
 // 환경 변수 및 상수 정의 (타입 단언 사용)
 const REST_API_KEY = import.meta.env.VITE_KAKAO_CLIENT_SECRET as string;
@@ -15,7 +16,7 @@ export interface User {
 }
 
 // 로그인/회원가입 응답 타입
-interface AuthResponse {
+export interface AuthResponse {
   user: User;
   token: string;
 }
@@ -114,33 +115,36 @@ export const login = createAsyncThunk<
   { rejectValue: string }
 >("auth/login", async (userData, { rejectWithValue }) => {
   try {
-    const response = await axios.post(
-      `${API_BASE_URL}/api/auth/login`,
+    const response = await axiosInstance.post<AuthResponse>(
+      "/api/auth/login",
       userData
     );
-    const data = response.data;
-    return data as AuthResponse;
+    return response.data;
   } catch (error: any) {
-    return rejectWithValue(error.message);
+    return rejectWithValue(
+      error.response?.data?.message ?? "로그인에 실패했습니다."
+    );
   }
 });
 
 // 회원가입 비동기 액션
-export const signup = createAsyncThunk<any, any, { rejectValue: string }>(
-  "auth/signup",
-  async (userData, { rejectWithValue }) => {
-    try {
-      const response = await axios.post(
-        `${API_BASE_URL}/api/auth/signup`,
-        userData
-      );
-      const data = response.data;
-      return data;
-    } catch (error: any) {
-      return rejectWithValue(error.message);
-    }
+export const signup = createAsyncThunk<
+  AuthResponse, // 회원가입도 user+token 내려준다면 이렇게
+  any,
+  { rejectValue: string }
+>("auth/signup", async (userData, { rejectWithValue }) => {
+  try {
+    const response = await axiosInstance.post<AuthResponse>(
+      "/api/auth/signup",
+      userData
+    );
+    return response.data;
+  } catch (error: any) {
+    return rejectWithValue(
+      error.response?.data?.message ?? "회원가입에 실패했습니다."
+    );
   }
-);
+});
 
 const authSlice = createSlice({
   name: "auth",
