@@ -11,6 +11,7 @@ export interface User {
   id: number;
   email: string;
   name: string;
+  profileImageUrl?: string;
   [key: string]: any; // 추가 필드 허용
 }
 
@@ -94,17 +95,15 @@ export const getKakaoToken = createAsyncThunk<
 
     // 2. 백엔드 서버로 액세스 토큰 전송하여 로그인/회원가입 처리
     const backendResponse = await axiosInstance.post<AuthResponse>(
-      "/api/auth/kakao",
+      "/auth/kakao",
       { accessToken: tokenData.access_token }
     );
 
-    const backendData = backendResponse.data;
-
-    // 백엔드에서 { user: {...}, token: "..." } 형태로 반환한다고 가정
-    return backendData as AuthResponse;
+    return backendResponse.data; // { user, token }
   } catch (error: any) {
-    console.error(error);
-    return rejectWithValue(error.message);
+    return rejectWithValue(
+      error.response?.data?.message ?? "카카오 로그인 실패"
+    );
   }
 });
 
@@ -116,7 +115,7 @@ export const login = createAsyncThunk<
 >("auth/login", async (userData, { rejectWithValue }) => {
   try {
     const response = await axiosInstance.post<AuthResponse>(
-      "/api/auth/login",
+      "/auth/login",
       userData
     );
     return response.data;
@@ -135,7 +134,7 @@ export const signup = createAsyncThunk<
 >("auth/signup", async (userData, { rejectWithValue }) => {
   try {
     const response = await axiosInstance.post<AuthResponse>(
-      "/api/auth/signup",
+      "/auth/signup",
       userData
     );
     return response.data;
@@ -154,6 +153,18 @@ const authSlice = createSlice({
       state.user = null;
       state.token = null;
       state.isAuthenticated = false;
+      state.error = null;
+      localStorage.removeItem("token");
+    },
+    // ✅ 개발용 더미 로그인 (mock)
+    mockLogin(state, action: PayloadAction<AuthResponse>) {
+      state.user = action.payload.user;
+      state.token = action.payload.token;
+      state.isAuthenticated = true;
+      state.error = null;
+
+      // 실제 로그인과 동일하게 동작하게 하려면
+      localStorage.setItem("token", action.payload.token);
     },
     clearError: (state) => {
       state.error = null;
@@ -183,6 +194,9 @@ const authSlice = createSlice({
           state.isAuthenticated = true;
           state.user = action.payload.user;
           state.token = action.payload.token;
+          state.error = null;
+
+          localStorage.setItem("token", action.payload.token);
         }
       )
       .addCase(getKakaoToken.rejected, (state, action) => {
@@ -220,5 +234,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, clearError } = authSlice.actions;
+export const { logout, clearError, mockLogin } = authSlice.actions;
 export default authSlice.reducer;
