@@ -1,0 +1,9 @@
+.mint-badge {
+  background-color: rgb(231, 249, 249) !important;
+  color: rgb(0, 196, 196) !important;
+
+  border: 0.8px solid rgb(231, 249, 249);
+  border-radius: 4px;
+
+  box-sizing: 6px 2px 6px 2px;
+}

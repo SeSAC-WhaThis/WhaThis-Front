@@ -15,6 +15,6 @@ export const PATH = {
     INDEX: "/products",
     FUNDINGPAGE: "/products/fundingPage",
     PREORDERPAGE: "/products/preorderPage",
-    DETAIL: (productId: number) => `/products/${productId}`,
+    DETAIL: (productId: number) => `/product/detail/${productId}`,
   },
 } as const;

@@ -12,7 +12,19 @@ export interface Product {
   currentAmount: number; // 현재 금액
   seller: string; // 판매자
   category: string;
+  type?: string; // 펀딩 타입 (예: 리워드, 기부 등)
+  description?: string; // 상품 설명
+  storyImage?: string; // 스토리 이미지 URL
 }
+
+// 상세 상품 조회 액션
+export const fetchProductDetail = createAsyncThunk<Product, number>(
+  "products/fetchProductDetail",
+  async (productId) => {
+    const response = await axiosInstance.get(`/products/${productId}`);
+    return response.data;
+  }
+);
 
 // 비동기 액션 생성 (API 호출)
 export const fetchFundingProducts = createAsyncThunk<Product[]>(
@@ -20,17 +32,40 @@ export const fetchFundingProducts = createAsyncThunk<Product[]>(
   async () => {
     const response = await axiosInstance.get("/products");
     return response.data;
+
+    // // 테스트용 더미 데이터
+    // const today = new Date();
+    // const endDate = new Date(today);
+    // endDate.setDate(today.getDate() + 15); // 15일 후 마감
+
+    // return [
+    //   {
+    //     id: 1,
+    //     title: "테스트 펀딩 상품",
+    //     thumbnailImageUrl: "https://via.placeholder.com/300",
+    //     startDate: today.toISOString(),
+    //     endDate: endDate.toISOString(),
+    //     goalAmount: 1000000,
+    //     currentAmount: 350000,
+    //     seller: "테스트 판매자",
+    //     category: "테크/가전",
+    //     type: "리워드",
+    //     description: "이것은 테스트를 위한 더미 데이터입니다.",
+    //   },
+    // ];
   }
 );
 
 interface ProductState {
   fundingProducts: Product[];
+  selectedProduct: Product | null;
   isLoading: boolean;
   error: string | null;
 }
 
 const initialState: ProductState = {
   fundingProducts: [],
+  selectedProduct: null,
   isLoading: false,
   error: null,
 };
@@ -55,6 +90,19 @@ const productSlice = createSlice({
       .addCase(fetchFundingProducts.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.error.message || "에러가 발생했습니다.";
+      })
+      // 상세 조회
+      .addCase(fetchProductDetail.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchProductDetail.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.selectedProduct = action.payload;
+      })
+      .addCase(fetchProductDetail.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || "상품 정보를 불러오는데 실패했습니다.";
       });
   },
 });

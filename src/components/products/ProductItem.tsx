@@ -1,11 +1,15 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { Product } from "../../store/productSlice";
+import { PATH } from "../../constants/path";
 
 interface ProductItemProps {
   product: Product;
 }
 
 const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
+  const navigate = useNavigate();
+
   const achievePercentage = Math.floor(
     (product.currentAmount / product.goalAmount) * 100
   );
@@ -17,8 +21,15 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
     0
   );
 
+  const handleItemClick = () => {
+    navigate(PATH.PRODUCT.DETAIL(product.id));
+  };
+
   return (
-    <div className="border rounded-lg border-white overflow-hidden shadow-lg hover:scale-105 transition-transform">
+    <div
+      onClick={handleItemClick}
+      className="border rounded-lg border-white overflow-hidden shadow-lg hover:scale-105 transition-transform cursor-pointer"
+    >
       <img
         src={product.thumbnailImageUrl}
         alt={product.title}
