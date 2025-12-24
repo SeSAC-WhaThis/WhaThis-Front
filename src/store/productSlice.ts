@@ -27,8 +27,8 @@ export const fetchProductDetail = createAsyncThunk<Product, number>(
 );
 
 // 비동기 액션 생성 (API 호출)
-export const fetchFundingProducts = createAsyncThunk<Product[]>(
-  "products/fetchFundingProducts",
+export const fetchProducts = createAsyncThunk<Product[]>(
+  "products/fetchProducts",
   async () => {
     const response = await axiosInstance.get("/products");
     return response.data;
@@ -57,14 +57,14 @@ export const fetchFundingProducts = createAsyncThunk<Product[]>(
 );
 
 interface ProductState {
-  fundingProducts: Product[];
+  products: Product[];
   selectedProduct: Product | null;
   isLoading: boolean;
   error: string | null;
 }
 
 const initialState: ProductState = {
-  fundingProducts: [],
+  products: [],
   selectedProduct: null,
   isLoading: false,
   error: null,
@@ -76,18 +76,16 @@ const productSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(fetchFundingProducts.pending, (state) => {
+      .addCase(fetchProducts.pending, (state) => {
         state.isLoading = true;
         state.error = null;
       })
-      .addCase(fetchFundingProducts.fulfilled, (state, action) => {
+      .addCase(fetchProducts.fulfilled, (state, action) => {
         state.isLoading = false;
         // API 응답이 배열인지 확인 후 할당 (배열이 아니면 빈 배열 처리)
-        state.fundingProducts = Array.isArray(action.payload)
-          ? action.payload
-          : [];
+        state.products = Array.isArray(action.payload) ? action.payload : [];
       })
-      .addCase(fetchFundingProducts.rejected, (state, action) => {
+      .addCase(fetchProducts.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.error.message || "에러가 발생했습니다.";
       })
@@ -102,7 +100,8 @@ const productSlice = createSlice({
       })
       .addCase(fetchProductDetail.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || "상품 정보를 불러오는데 실패했습니다.";
+        state.error =
+          action.error.message || "상품 정보를 불러오는데 실패했습니다.";
       });
   },
 });

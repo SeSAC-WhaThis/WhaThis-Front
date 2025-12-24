@@ -37,7 +37,13 @@ const FundingDetail: React.FC<FundingDetailProps> = ({ product }) => {
         />
 
         <div className="font-bold text-lg py-4">프로젝트 스토리</div>
-        <div><img src={product.storyImage} alt="프로젝트 스토리" className="w-full h-auto object-cover aspect-video" /></div>
+        <div>
+          <img
+            src={product.storyImage}
+            alt="프로젝트 스토리"
+            className="w-full h-auto object-cover aspect-video"
+          />
+        </div>
       </div>
 
       {/* 오른쪽 (사이드바 쪽): 정보 및 버튼 */}
