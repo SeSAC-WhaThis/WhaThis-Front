@@ -231,7 +231,7 @@ const ProductCreatePage: React.FC = () => {
               className="w-full border border-gray-300 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#00cfcf] bg-white transition-shadow"
             >
               <option value="">카테고리를 선택해주세요</option>
-              {categories.map((cat) => (
+            {Array.isArray(categories) && categories.map((cat) => (
                 <option key={cat.id} value={cat.id}>
                   {cat.name}
                 </option>

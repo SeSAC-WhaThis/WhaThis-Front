@@ -162,7 +162,7 @@ const productSlice = createSlice({
       })
       // 카테고리 조회
       .addCase(fetchCategories.fulfilled, (state, action) => {
-        state.categories = action.payload;
+        state.categories = Array.isArray(action.payload) ? action.payload : [];
       })
       // 상품 생성
       .addCase(createProduct.pending, (state) => {

@@ -13,7 +13,7 @@ const FundingPage: React.FC = () => {
   );
 
   // FUNDING 타입만 필터링
-  const fundingProducts = products.filter((p) => p.type === "FUNDING");
+  const fundingProducts = products;
 
   useEffect(() => {
     dispatch(fetchProducts());
