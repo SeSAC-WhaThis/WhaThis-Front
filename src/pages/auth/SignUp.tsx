@@ -60,7 +60,7 @@ const SignUp = () => {
       isPasswordConfirmValid
     ) {
       // 백엔드로 보낼 데이터
-      const userData = { email, password, name, nickname };
+      const userData = { email, password, name, nickname, confirmpassword: passwordConfirm };
       
       // @ts-ignore
       dispatch(signup(userData))
