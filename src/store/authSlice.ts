@@ -9,6 +9,7 @@ const REDIRECT_URI = import.meta.env.VITE_KAKAO_REDIRECT_URI as string;
 // 사용자 정보 타입 정의
 export interface User {
   id: number;
+  nickname: string;
   email: string;
   name: string;
   profileImageUrl?: string;
