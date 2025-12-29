@@ -7,11 +7,13 @@ import "./Login.css"; // 로그인 페이지 스타일 재사용
 
 const SignUp = () => {
   const [name, setName] = useState("");
+  const [nickname, setNickname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
 
   const [nameError, setNameError] = useState("");
+  const [nicknameError, setNicknameError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [passwordConfirmError, setPasswordConfirmError] = useState("");
@@ -38,11 +40,13 @@ const SignUp = () => {
 
     // 제출 시 최종 유효성 검사
     const isNameValid = !!name.trim();
+    const isNicknameValid = !!nickname.trim();
     const isEmailValid = validateEmail(email);
     const isPasswordValid = validatePassword(password);
     const isPasswordConfirmValid = password === passwordConfirm;
 
     if (!isNameValid) setNameError("이름을 입력해주세요.");
+    if (!isNicknameValid) setNicknameError("닉네임을 입력해주세요.");
     if (!isEmailValid) setEmailError("이메일 형식이 올바르지 않습니다.");
     if (!isPasswordValid) setPasswordError("비밀번호는 8자 이상이어야 합니다.");
     if (!isPasswordConfirmValid)
@@ -50,12 +54,13 @@ const SignUp = () => {
 
     if (
       isNameValid &&
+      isNicknameValid &&
       isEmailValid &&
       isPasswordValid &&
       isPasswordConfirmValid
     ) {
       // 백엔드로 보낼 데이터
-      const userData = { email, password, name };
+      const userData = { email, password, name, nickname };
       
       // @ts-ignore
       dispatch(signup(userData))
@@ -89,6 +94,23 @@ const SignUp = () => {
             />
             {nameError && (
               <p className="text-red-500 text-sm mt-1">{nameError}</p>
+            )}
+          </div>
+
+          {/* 닉네임 */}
+          <div className="input-group">
+            <input
+              type="text"
+              placeholder="닉네임"
+              value={nickname}
+              onChange={(e) => {
+                setNickname(e.target.value);
+                if (nicknameError) setNicknameError("");
+              }}
+              className="login-input"
+            />
+            {nicknameError && (
+              <p className="text-red-500 text-sm mt-1">{nicknameError}</p>
             )}
           </div>
 

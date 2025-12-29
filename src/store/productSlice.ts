@@ -10,6 +10,8 @@ export interface Product {
   endDate: string; // 종료 날짜
   goalAmount: number; // 목표 금액
   currentAmount: number; // 현재 금액
+  price?: number; // 가격
+  inventory?: number; // 재고
   seller: string; // 판매자
   category: string;
   type?: string; // 펀딩 타입 (예: 리워드, 기부 등)

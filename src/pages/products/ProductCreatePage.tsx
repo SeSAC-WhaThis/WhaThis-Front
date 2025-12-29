@@ -14,7 +14,9 @@ const ProductCreatePage: React.FC = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState<number | "">("");
+  const [price, setPrice] = useState<string>("");
   const [goalAmount, setGoalAmount] = useState<string>("");
+  const [inventory, setInventory] = useState<number | "">("");
   const [endDate, setEndDate] = useState("");
   const [thumbnailImage, setThumbnailImage] = useState<File | null>(null);
   const [storyImage, setStoryImage] = useState<File | null>(null);
@@ -31,7 +33,9 @@ const ProductCreatePage: React.FC = () => {
     title: "",
     description: "",
     categoryId: "",
+    price: "",
     goalAmount: "",
+    inventory: "",
     endDate: "",
     thumbnailImage: "",
     storyImage: "",
@@ -77,6 +81,18 @@ const ProductCreatePage: React.FC = () => {
     }
   };
 
+  // 가격 입력 핸들러 (천 단위 콤마)
+  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/,/g, "");
+    if (value === "") {
+      setPrice("");
+      return;
+    }
+    if (!isNaN(Number(value))) {
+      setPrice(Number(value).toLocaleString());
+    }
+  };
+
   const validateForm = () => {
     let isValid = true;
     const newErrors = {
@@ -84,7 +100,9 @@ const ProductCreatePage: React.FC = () => {
       description: "",
       categoryId: "",
       goalAmount: "",
+      price: "",
       endDate: "",
+      inventory: "",
       thumbnailImage: "",
       storyImage: "",
     };
@@ -99,9 +117,20 @@ const ProductCreatePage: React.FC = () => {
       isValid = false;
     }
 
+    const priceAmount = Number(price.replace(/,/g, ""));
+    if (!priceAmount || priceAmount <= 0) {
+      newErrors.price = "가격은 0원보다 커야 합니다.";
+      isValid = false;
+    }
+
     const amount = Number(goalAmount.replace(/,/g, ""));
     if (!amount || amount <= 0) {
       newErrors.goalAmount = "목표 금액은 0원보다 커야 합니다.";
+      isValid = false;
+    }
+
+    if (!inventory || Number(inventory) <= 0) {
+      newErrors.inventory = "재고는 0개보다 많아야 합니다.";
       isValid = false;
     }
 
@@ -135,7 +164,9 @@ const ProductCreatePage: React.FC = () => {
     description !== "" ||
     categoryId !== "" ||
     goalAmount !== "" ||
+    price !== "" ||
     endDate !== "" ||
+    inventory !== "" ||
     thumbnailImage !== null ||
     storyImage !== null;
 
@@ -177,7 +208,9 @@ const ProductCreatePage: React.FC = () => {
     formData.append("title", title);
     formData.append("description", description);
     formData.append("categoryId", String(categoryId));
+    formData.append("price", price.replace(/,/g, ""));
     formData.append("goalAmount", goalAmount.replace(/,/g, ""));
+    formData.append("inventory", String(inventory));
     formData.append("endDate", endDate);
     if (thumbnailImage) formData.append("thumbnailImage", thumbnailImage);
     if (storyImage) formData.append("storyImage", storyImage);
@@ -255,6 +288,28 @@ const ProductCreatePage: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* 가격 */}
+          <div>
+            <label className="block text-base font-bold text-gray-800 mb-2">
+              가격
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                value={price}
+                onChange={handlePriceChange}
+                className="w-full border border-gray-300 rounded-md px-4 py-3 pr-10 focus:outline-none focus:ring-2 focus:ring-[#00cfcf] transition-shadow"
+                placeholder="0"
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">
+                원
+              </span>
+            </div>
+            {errors.price && (
+              <p className="text-red-500 text-sm mt-1">{errors.price}</p>
+            )}
+          </div>
+
           {/* 목표 금액 */}
           <div>
             <label className="block text-base font-bold text-gray-800 mb-2">
@@ -276,7 +331,25 @@ const ProductCreatePage: React.FC = () => {
               <p className="text-red-500 text-sm mt-1">{errors.goalAmount}</p>
             )}
           </div>
+        </div>
 
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* 재고 */}
+          <div>
+            <label className="block text-base font-bold text-gray-800 mb-2">
+              재고
+            </label>
+            <input
+              type="number"
+              value={inventory}
+              onChange={(e) => setInventory(Number(e.target.value))}
+              className="w-full border border-gray-300 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#00cfcf] transition-shadow"
+              placeholder="0"
+            />
+            {errors.inventory && (
+              <p className="text-red-500 text-sm mt-1">{errors.inventory}</p>
+            )}
+          </div>
           {/* 펀딩 종료일 */}
           <div>
             <label className="block text-base font-bold text-gray-800 mb-2">
