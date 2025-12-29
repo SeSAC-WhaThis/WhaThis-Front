@@ -5,6 +5,7 @@ import axiosInstance from "../api/axiosInstance";
 export interface Product {
   id: number;
   title: string;
+  brn?: string; // 사업자등록번호
   thumbnailImageUrl: string;
   startDate: string; // 시작 날짜
   endDate: string; // 종료 날짜

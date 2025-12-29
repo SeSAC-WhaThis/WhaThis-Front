@@ -61,46 +61,41 @@ export const loginKakao = createAsyncThunk(
   }
 );
 
-// 카카오 인가 코드로 토큰 및 사용자 정보 가져오기
 export const getKakaoToken = createAsyncThunk<
   AuthResponse,
   string,
   { rejectValue: string }
 >("auth/getKakaoToken", async (code, { rejectWithValue }) => {
   try {
-    if (!KAKAO_CLIENT_ID || !REDIRECT_URI) {
-      throw new Error(
-        "환경 변수(VITE_KAKAO_CLIENT_SECRET, VITE_KAKAO_REDIRECT_URI)가 설정되지 않았습니다."
-      );
+    // 1. 인가 코드(Code)를 백엔드로 바로 전송
+    // 백엔드는 { code: "..." } 형태의 JSON을 기대합니다.
+    const response = await axiosInstance.post("/auth/kakao", { code });
+
+    // 2. 백엔드 응답 헤더에서 액세스 토큰 추출
+    // 백엔드가 "Authorization: Bearer <token>" 형태로 헤더를 보냅니다.
+    const authHeader = response.headers["authorization"];
+    const accessToken = authHeader?.replace("Bearer ", "");
+
+    if (!accessToken) {
+      throw new Error("인증 토큰을 받아오지 못했습니다.");
     }
 
-    const params = new URLSearchParams({
-      grant_type: "authorization_code",
-      client_id: KAKAO_CLIENT_ID,
-      redirect_uri: REDIRECT_URI,
-      code,
+    // 3. 토큰 저장 (로컬 스토리지)
+    localStorage.setItem("token", accessToken);
+
+    // 4. 사용자 프로필 정보 조회
+    // 로그인 응답에는 유저 정보가 없으므로, 토큰을 헤더에 실어 별도로 요청해야 합니다.
+    const profileResponse = await axiosInstance.get("/users/profile", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
     });
 
-    // 1. 인가 코드로 액세스 토큰 요청
-    const tokenResponse = await axios.post(
-      "https://kauth.kakao.com/oauth/token",
-      params,
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
-        },
-      }
-    );
+    // 백엔드 ApiResponse 구조: { success: true, data: { ...UserResponse... }, ... }
+    const user = profileResponse.data.data;
 
-    const tokenData = tokenResponse.data;
-
-    // 2. 백엔드 서버로 액세스 토큰 전송하여 로그인/회원가입 처리
-    const backendResponse = await axiosInstance.post<AuthResponse>(
-      "/auth/kakao",
-      { accessToken: tokenData.access_token }
-    );
-
-    return backendResponse.data; // { user, token }
+    // 5. Redux 상태 업데이트를 위해 반환
+    return { user, token: accessToken };
   } catch (error: any) {
     return rejectWithValue(
       error.response?.data?.message ?? "카카오 로그인 실패"

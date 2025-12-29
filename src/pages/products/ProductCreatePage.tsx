@@ -11,12 +11,13 @@ const ProductCreatePage: React.FC = () => {
   const dispatch = useDispatch<ThunkDispatch<any, any, any>>();
 
   // 입력 상태 관리
+  const [brn, setBrn] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState<number | "">("");
-  const [price, setPrice] = useState<string>("");
   const [goalAmount, setGoalAmount] = useState<string>("");
   const [inventory, setInventory] = useState<number | "">("");
+  const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [thumbnailImage, setThumbnailImage] = useState<File | null>(null);
   const [storyImage, setStoryImage] = useState<File | null>(null);
@@ -30,12 +31,13 @@ const ProductCreatePage: React.FC = () => {
 
   // 에러 상태 관리
   const [errors, setErrors] = useState({
+    brn: "",
     title: "",
     description: "",
     categoryId: "",
-    price: "",
     goalAmount: "",
     inventory: "",
+    startDate: "",
     endDate: "",
     thumbnailImage: "",
     storyImage: "",
@@ -53,8 +55,10 @@ const ProductCreatePage: React.FC = () => {
 
   // 카테고리 목록 가져오기
   useEffect(() => {
-    dispatch(fetchCategories());
-  }, [dispatch]);
+    if (categories.length === 0) {
+      dispatch(fetchCategories());
+    }
+  }, [dispatch, categories.length]);
 
   // 파일 선택 핸들러
   const handleFileChange = (
@@ -69,6 +73,24 @@ const ProductCreatePage: React.FC = () => {
     }
   };
 
+  // 사업자등록번호 포맷팅 핸들러 (XXX-XX-XXXXX)
+  const handleBrnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/[^0-9]/g, "");
+    let formattedValue = "";
+
+    if (value.length <= 3) {
+      formattedValue = value;
+    } else if (value.length <= 5) {
+      formattedValue = `${value.slice(0, 3)}-${value.slice(3)}`;
+    } else {
+      formattedValue = `${value.slice(0, 3)}-${value.slice(3, 5)}-${value.slice(
+        5,
+        10
+      )}`;
+    }
+    setBrn(formattedValue);
+  };
+
   // 목표 금액 입력 핸들러 (천 단위 콤마)
   const handleGoalAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/,/g, "");
@@ -81,18 +103,6 @@ const ProductCreatePage: React.FC = () => {
     }
   };
 
-  // 가격 입력 핸들러 (천 단위 콤마)
-  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/,/g, "");
-    if (value === "") {
-      setPrice("");
-      return;
-    }
-    if (!isNaN(Number(value))) {
-      setPrice(Number(value).toLocaleString());
-    }
-  };
-
   const validateForm = () => {
     let isValid = true;
     const newErrors = {
@@ -100,7 +110,6 @@ const ProductCreatePage: React.FC = () => {
       description: "",
       categoryId: "",
       goalAmount: "",
-      price: "",
       endDate: "",
       inventory: "",
       thumbnailImage: "",
@@ -117,12 +126,6 @@ const ProductCreatePage: React.FC = () => {
       isValid = false;
     }
 
-    const priceAmount = Number(price.replace(/,/g, ""));
-    if (!priceAmount || priceAmount <= 0) {
-      newErrors.price = "가격은 0원보다 커야 합니다.";
-      isValid = false;
-    }
-
     const amount = Number(goalAmount.replace(/,/g, ""));
     if (!amount || amount <= 0) {
       newErrors.goalAmount = "목표 금액은 0원보다 커야 합니다.";
@@ -134,9 +137,28 @@ const ProductCreatePage: React.FC = () => {
       isValid = false;
     }
 
+    if (!startDate) {
+      newErrors.startDate = "펀딩 시작일을 선택해주세요.";
+      isValid = false;
+    }
+
+    if (!startDate) {
+      newErrors.startDate = "펀딩 시작일을 선택해주세요.";
+      isValid = false;
+    }
+
     if (!endDate) {
       newErrors.endDate = "펀딩 종료일을 선택해주세요.";
       isValid = false;
+    }
+
+    if (startDate && endDate) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      if (start >= end) {
+        newErrors.endDate = "펀딩 종료일은 시작일보다 이후여야 합니다.";
+        isValid = false;
+      }
     }
 
     if (!description.trim()) {
@@ -160,11 +182,12 @@ const ProductCreatePage: React.FC = () => {
 
   // 폼에 작성된 내용이 있는지 확인 (Dirty Check)
   const isFormDirty =
+    brn !== "" ||
     title !== "" ||
     description !== "" ||
     categoryId !== "" ||
     goalAmount !== "" ||
-    price !== "" ||
+    startDate !== "" ||
     endDate !== "" ||
     inventory !== "" ||
     thumbnailImage !== null ||
@@ -205,13 +228,15 @@ const ProductCreatePage: React.FC = () => {
     if (!validateForm()) return;
 
     const formData = new FormData();
+    formData.append("brn", brn);
     formData.append("title", title);
     formData.append("description", description);
     formData.append("categoryId", String(categoryId));
-    formData.append("price", price.replace(/,/g, ""));
     formData.append("goalAmount", goalAmount.replace(/,/g, ""));
     formData.append("inventory", String(inventory));
+    formData.append("startDate", startDate);
     formData.append("endDate", endDate);
+    formData.append("description", description);
     if (thumbnailImage) formData.append("thumbnailImage", thumbnailImage);
     if (storyImage) formData.append("storyImage", storyImage);
 
@@ -238,134 +263,142 @@ const ProductCreatePage: React.FC = () => {
 
       <form
         onSubmit={handleSubmit}
-        className="flex flex-col gap-12 bg-white p-8 rounded-lg shadow-sm border border-gray-100"
+        className="flex flex-col gap-6 bg-white p-8 rounded-lg shadow-sm border border-gray-100"
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* 프로젝트명 */}
-          <div>
-            <label className="block text-base font-bold text-gray-800 mb-2">
-              프로젝트명
-            </label>
+        {/* 1. 사업자등록번호 */}
+        <div>
+          <label className="block text-base font-bold text-gray-800 mb-2">
+            사업자등록번호
+          </label>
+          <input
+            type="text"
+            value={brn}
+            onChange={handleBrnChange}
+            maxLength={12}
+            className="w-full border border-gray-300 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#00cfcf] transition-shadow"
+            placeholder="000-00-00000"
+          />
+          {errors.brn && (
+            <p className="text-red-500 text-sm mt-1">{errors.brn}</p>
+          )}
+        </div>
+
+        {/* 2. 프로젝트명 */}
+        <div>
+          <label className="block text-base font-bold text-gray-800 mb-2">
+            프로젝트명
+          </label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="w-full border border-gray-300 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#00cfcf] transition-shadow"
+            placeholder="프로젝트 이름을 입력하세요"
+          />
+          {errors.title && (
+            <p className="text-red-500 text-sm mt-1">{errors.title}</p>
+          )}
+        </div>
+
+        {/* 3. 카테고리 */}
+        <div>
+          <label className="block text-base font-bold text-gray-800 mb-2">
+            카테고리
+          </label>
+          <select
+            value={categoryId}
+            onChange={(e) => setCategoryId(Number(e.target.value))}
+            className="w-full border border-gray-300 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#00cfcf] bg-white transition-shadow"
+          >
+            <option value="">카테고리를 선택해주세요</option>
+            {Array.isArray(categories) &&
+              categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </option>
+              ))}
+          </select>
+          {errors.categoryId && (
+            <p className="text-red-500 text-sm mt-1">{errors.categoryId}</p>
+          )}
+          {apiError && categories.length === 0 && (
+            <p className="text-red-500 text-sm mt-1">
+              카테고리 로딩 실패: {apiError}
+            </p>
+          )}
+        </div>
+
+        {/* 4. 목표 금액 */}
+        <div>
+          <label className="block text-base font-bold text-gray-800 mb-2">
+            목표 금액
+          </label>
+          <div className="relative">
             <input
               type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-full border border-gray-300 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#00cfcf] transition-shadow"
-              placeholder="프로젝트 이름을 입력하세요"
-            />
-            {errors.title && (
-              <p className="text-red-500 text-sm mt-1">{errors.title}</p>
-            )}
-          </div>
-
-          {/* 카테고리 */}
-          <div>
-            <label className="block text-base font-bold text-gray-800 mb-2">
-              카테고리
-            </label>
-            <select
-              value={categoryId}
-              onChange={(e) => setCategoryId(Number(e.target.value))}
-              className="w-full border border-gray-300 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#00cfcf] bg-white transition-shadow"
-            >
-              <option value="">카테고리를 선택해주세요</option>
-              {Array.isArray(categories) &&
-                categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </option>
-                ))}
-            </select>
-            {errors.categoryId && (
-              <p className="text-red-500 text-sm mt-1">{errors.categoryId}</p>
-            )}
-            {apiError && categories.length === 0 && (
-              <p className="text-red-500 text-sm mt-1">
-                카테고리 로딩 실패: {apiError}
-              </p>
-            )}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* 가격 */}
-          <div>
-            <label className="block text-base font-bold text-gray-800 mb-2">
-              가격
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                value={price}
-                onChange={handlePriceChange}
-                className="w-full border border-gray-300 rounded-md px-4 py-3 pr-10 focus:outline-none focus:ring-2 focus:ring-[#00cfcf] transition-shadow"
-                placeholder="0"
-              />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">
-                원
-              </span>
-            </div>
-            {errors.price && (
-              <p className="text-red-500 text-sm mt-1">{errors.price}</p>
-            )}
-          </div>
-
-          {/* 목표 금액 */}
-          <div>
-            <label className="block text-base font-bold text-gray-800 mb-2">
-              목표 금액
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                value={goalAmount}
-                onChange={handleGoalAmountChange}
-                className="w-full border border-gray-300 rounded-md px-4 py-3 pr-10 focus:outline-none focus:ring-2 focus:ring-[#00cfcf] transition-shadow"
-                placeholder="0"
-              />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">
-                원
-              </span>
-            </div>
-            {errors.goalAmount && (
-              <p className="text-red-500 text-sm mt-1">{errors.goalAmount}</p>
-            )}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* 재고 */}
-          <div>
-            <label className="block text-base font-bold text-gray-800 mb-2">
-              재고
-            </label>
-            <input
-              type="number"
-              value={inventory}
-              onChange={(e) => setInventory(Number(e.target.value))}
-              className="w-full border border-gray-300 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#00cfcf] transition-shadow"
+              value={goalAmount}
+              onChange={handleGoalAmountChange}
+              className="w-full border border-gray-300 rounded-md px-4 py-3 pr-10 focus:outline-none focus:ring-2 focus:ring-[#00cfcf] transition-shadow"
               placeholder="0"
             />
-            {errors.inventory && (
-              <p className="text-red-500 text-sm mt-1">{errors.inventory}</p>
-            )}
+            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">
+              원
+            </span>
           </div>
-          {/* 펀딩 종료일 */}
-          <div>
-            <label className="block text-base font-bold text-gray-800 mb-2">
-              펀딩 종료일
-            </label>
-            <input
-              type="date"
-              value={endDate}
-              min={today}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="w-full border border-gray-300 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#00cfcf] transition-shadow"
-            />
-            {errors.endDate && (
-              <p className="text-red-500 text-sm mt-1">{errors.endDate}</p>
-            )}
-          </div>
+          {errors.goalAmount && (
+            <p className="text-red-500 text-sm mt-1">{errors.goalAmount}</p>
+          )}
+        </div>
+
+        {/* 5. 재고 */}
+        <div>
+          <label className="block text-base font-bold text-gray-800 mb-2">
+            재고
+          </label>
+          <input
+            type="number"
+            value={inventory}
+            onChange={(e) => setInventory(Number(e.target.value))}
+            className="w-full border border-gray-300 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#00cfcf] transition-shadow"
+            placeholder="0"
+          />
+          {errors.inventory && (
+            <p className="text-red-500 text-sm mt-1">{errors.inventory}</p>
+          )}
+        </div>
+
+        {/* 6. 펀딩 시작일 */}
+        <div>
+          <label className="block text-base font-bold text-gray-800 mb-2">
+            펀딩 시작일
+          </label>
+          <input
+            type="date"
+            value={startDate}
+            min={today}
+            onChange={(e) => setStartDate(e.target.value)}
+            className="w-full border border-gray-300 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#00cfcf] transition-shadow"
+          />
+          {errors.startDate && (
+            <p className="text-red-500 text-sm mt-1">{errors.startDate}</p>
+          )}
+        </div>
+
+        {/* 7. 펀딩 종료일 */}
+        <div>
+          <label className="block text-base font-bold text-gray-800 mb-2">
+            펀딩 종료일
+          </label>
+          <input
+            type="date"
+            value={endDate}
+            min={startDate || today}
+            onChange={(e) => setEndDate(e.target.value)}
+            className="w-full border border-gray-300 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#00cfcf] transition-shadow"
+          />
+          {errors.endDate && (
+            <p className="text-red-500 text-sm mt-1">{errors.endDate}</p>
+          )}
         </div>
 
         {/* 프로젝트 설명 */}
