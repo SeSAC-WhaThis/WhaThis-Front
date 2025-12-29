@@ -6,7 +6,7 @@ import "./Login.css";
 import kakaoLoginImg from "../../assets/icons/kakao.png";
 import naverLoginImg from "../../assets/icons/naver.png";
 import googleIcon from "../../assets/icons/google.png";
-import { loginKakao, clearError, login } from "../../store/authSlice";
+import { loginKakao, login } from "../../store/authSlice";
 import { PATH } from "../../constants/path";
 
 const Login = () => {
@@ -18,7 +18,7 @@ const Login = () => {
 
   const dispatch = useDispatch();
   // @ts-ignore: JS 파일인 store/index.js의 타입을 추론하지 못할 경우를 대비해 임시로 무시하거나 RootState 타입을 정의해야 합니다.
-  const { loading, isAuthenticated, user, error } = useSelector(
+  const { loading } = useSelector(
     (state: any) => state.auth
   );
 
@@ -36,7 +36,7 @@ const Login = () => {
     }
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateEmail(email)) {
       setEmailError("이메일 형식이 올바르지 않습니다.");
@@ -49,22 +49,17 @@ const Login = () => {
       localStorage.removeItem("savedEmail");
     }
 
-    // @ts-ignore
-    dispatch(login({ email, password }));
+    try {
+      // @ts-ignore
+      const result = await dispatch(login({ email, password })).unwrap();
+      console.log("로그인 성공!", result);
+      alert(`로그인 성공! 환영합니다 ${result.user.nickname}님.`);
+      navigate(PATH.MAIN);
+    } catch (err) {
+      console.error("로그인 실패:", err);
+      alert("로그인 실패: " + err);
+    }
   };
-
-  // 로그인 상태 변경 감지 및 처리
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      console.log("로그인 성공! Redux 상태가 변경되었습니다.", user);
-      alert(`로그인 성공! 환영합니다 ${user.nickname}님.`);
-      navigate(PATH.MAIN); // 메인 페이지로 이동
-    }
-    if (error) {
-      alert("로그인 실패: " + error);
-      dispatch(clearError()); // 알림 확인 후 에러 초기화
-    }
-  }, [isAuthenticated, user, error, navigate, dispatch]);
 
   const handleKakaoLogin = () => {
     // @ts-ignore: Thunk 액션 디스패치 타입 호환성 문제 방지
@@ -118,8 +113,8 @@ const Login = () => {
               <span>로그인 유지</span>
             </label>
           </div>
-          <button type="submit" className="login-button primary">
-            로그인
+          <button type="submit" className="login-button primary" disabled={loading}>
+            {loading ? "로그인 중..." : "로그인"}
           </button>
         </form>
 
