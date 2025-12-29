@@ -26,6 +26,15 @@ export const fetchProductDetail = createAsyncThunk<Product, number>(
   }
 );
 
+// 내 상품 조회 액션
+export const fetchMyProducts = createAsyncThunk<Product[]>(
+  "products/fetchMyProducts",
+  async () => {
+    const response = await axiosInstance.get("/product/my");
+    return response.data;
+  }
+);
+
 // 비동기 액션 생성 (API 호출)
 export const fetchProducts = createAsyncThunk<Product[]>(
   "products/fetchProducts",
@@ -58,6 +67,7 @@ export const fetchProducts = createAsyncThunk<Product[]>(
 
 interface ProductState {
   products: Product[];
+  myProducts: Product[];
   selectedProduct: Product | null;
   isLoading: boolean;
   error: string | null;
@@ -65,6 +75,7 @@ interface ProductState {
 
 const initialState: ProductState = {
   products: [],
+  myProducts: [],
   selectedProduct: null,
   isLoading: false,
   error: null,
@@ -102,6 +113,19 @@ const productSlice = createSlice({
         state.isLoading = false;
         state.error =
           action.error.message || "상품 정보를 불러오는데 실패했습니다.";
+      })
+      // 내 상품 조회
+      .addCase(fetchMyProducts.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchMyProducts.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.myProducts = Array.isArray(action.payload) ? action.payload : [];
+      })
+      .addCase(fetchMyProducts.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || "내 상품을 불러오는데 실패했습니다.";
       });
   },
 });

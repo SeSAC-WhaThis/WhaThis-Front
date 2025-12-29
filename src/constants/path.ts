@@ -10,6 +10,7 @@ export const PATH = {
     LOGIN: "/auth/login",
     KAKAO_CALLBACK: "/oauth/kakao/callback",
     SIGNUP: "/auth/signup",
+    PROFILE: "/auth/profile",
   },
   PRODUCT: {
     INDEX: "/products",

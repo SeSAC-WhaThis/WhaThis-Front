@@ -1,5 +1,5 @@
 import React from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../../store/authSlice";
 import { useState } from "react";
@@ -85,18 +85,23 @@ export default function RootMenus() {
               </NavLink>
             ) : (
               <>
-                <img
-                  src={profileImgSrc}
-                  alt="프로필"
-                  className="w-10 h-10 rounded-full object-cover"
-                  onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).src = defaultavatar;
-                  }}
-                />
+                <Link
+                  to={PATH.AUTH.PROFILE}
+                  className="flex items-center gap-2"
+                >
+                  <img
+                    src={profileImgSrc}
+                    alt="프로필"
+                    className="w-10 h-10 rounded-full object-cover"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = defaultavatar;
+                    }}
+                  />
 
-                <span className="text-[18px] font-medium text-black max-w-40 truncate">
-                  {user?.name ?? "사용자"}
-                </span>
+                  <span className="text-[18px] font-medium text-black max-w-40 truncate">
+                    {user?.name ?? "사용자"}
+                  </span>
+                </Link>
 
                 <button
                   onClick={handleLogout}

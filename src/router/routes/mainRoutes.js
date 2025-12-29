@@ -4,6 +4,7 @@ import MyPage from "../../pages/auth/MyPage";
 import FundingPage from "../../pages/products/FundingPage";
 import PreorderPage from "../../pages/products/PreorderPage";
 import ProductDetailPage from "../../pages/products/ProductDetailPage";
+import ProfilePage from "../../pages/products/ProfilePage";
 import { PATH } from "../../constants/path";
 import { Component } from "react";
 
@@ -31,6 +32,10 @@ const rootRoutes = [
       {
         path: "/product/detail/:productId",
         Component: ProductDetailPage,
+      },
+      {
+        path: PATH.AUTH.PROFILE,
+        Component: ProfilePage,
       },
     ],
   },
