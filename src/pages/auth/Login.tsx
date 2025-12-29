@@ -18,9 +18,7 @@ const Login = () => {
 
   const dispatch = useDispatch();
   // @ts-ignore: JS 파일인 store/index.js의 타입을 추론하지 못할 경우를 대비해 임시로 무시하거나 RootState 타입을 정의해야 합니다.
-  const { loading } = useSelector(
-    (state: any) => state.auth
-  );
+  const { loading } = useSelector((state: any) => state.auth);
 
   const validateEmail = (email: string) => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -53,7 +51,7 @@ const Login = () => {
       // @ts-ignore
       const result = await dispatch(login({ email, password })).unwrap();
       console.log("로그인 성공!", result);
-      alert(`로그인 성공! 환영합니다 ${result.user.nickname}님.`);
+      alert(`로그인 성공! 환영합니다`);
       navigate(PATH.MAIN);
     } catch (err) {
       console.error("로그인 실패:", err);
@@ -113,7 +111,11 @@ const Login = () => {
               <span>로그인 유지</span>
             </label>
           </div>
-          <button type="submit" className="login-button primary" disabled={loading}>
+          <button
+            type="submit"
+            className="login-button primary"
+            disabled={loading}
+          >
             {loading ? "로그인 중..." : "로그인"}
           </button>
         </form>

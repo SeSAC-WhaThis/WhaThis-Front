@@ -33,8 +33,8 @@ interface AuthState {
 
 const initialState: AuthState = {
   user: null,
-  token: null,
-  isAuthenticated: false,
+  token: localStorage.getItem("token"),
+  isAuthenticated: !!localStorage.getItem("token"),
   loading: false,
   error: null,
 };
@@ -115,11 +115,20 @@ export const login = createAsyncThunk<
   { rejectValue: string }
 >("auth/login", async (userData, { rejectWithValue }) => {
   try {
-    const response = await axiosInstance.post<AuthResponse>(
-      "/auth/login",
-      userData
-    );
-    return response.data;
+    const response = await axiosInstance.post("/auth/login", userData);
+
+    // 헤더에서 토큰 추출
+    const authorization = response.headers["authorization"];
+    const token = authorization ? authorization.replace("Bearer ", "") : null;
+
+    // 바디 데이터 처리 (유저 정보)
+    const user = response.data.user || response.data;
+
+    if (!token) {
+      throw new Error("인증 토큰이 헤더에 없습니다.");
+    }
+
+    return { user, token };
   } catch (error: any) {
     return rejectWithValue(
       error.response?.data?.message ?? "로그인에 실패했습니다."
@@ -226,6 +235,8 @@ const authSlice = createSlice({
           state.isAuthenticated = true;
           state.user = action.payload.user;
           state.token = action.payload.token;
+          state.error = null;
+          localStorage.setItem("token", action.payload.token);
         }
       )
       .addCase(login.rejected, (state, action) => {
