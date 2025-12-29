@@ -5,6 +5,7 @@ import ProductList from "../../components/products/ProductList";
 import { fetchMyProducts } from "../../store/productSlice";
 import type { RootState } from "../../store";
 import type { ThunkDispatch } from "@reduxjs/toolkit";
+import { PATH } from "../../constants/path";
 import defaultavatar from "../../assets/icons/defaultavatar.png";
 
 const ProfilePage: React.FC = () => {
@@ -23,7 +24,19 @@ const ProfilePage: React.FC = () => {
   }, [dispatch, activeTab]);
 
   if (!user) {
-    return <div className="p-8 text-center">로그인이 필요한 페이지입니다.</div>;
+    return (
+      <div className="flex flex-col items-center justify-center py-20 gap-4">
+        <div className="text-gray-500 text-lg">
+          로그인이 필요한 페이지입니다.
+        </div>
+        <button
+          onClick={() => navigate(PATH.AUTH.LOGIN)}
+          className="px-6 py-2 bg-[#00cfcf] text-white rounded-md hover:bg-[#00afaf] transition-colors font-bold"
+        >
+          로그인 하러 가기
+        </button>
+      </div>
+    );
   }
 
   // user 타입에 nickname이 없으면 name을 사용하도록 처리
@@ -79,7 +92,7 @@ const ProfilePage: React.FC = () => {
             <div className="flex justify-between items-center mb-6 border-b pb-4">
               <h2 className="text-2xl font-bold">내가 만든 프로젝트</h2>
               <button
-                onClick={() => navigate("/product/create")}
+                onClick={() => navigate(PATH.PRODUCT.CREATE)}
                 className="px-6 py-2 bg-[#00cfcf] text-white rounded-md hover:bg-[#00afaf] transition-colors font-bold"
               >
                 프로젝트 만들기
