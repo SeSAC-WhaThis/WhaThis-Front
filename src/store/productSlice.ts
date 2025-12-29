@@ -17,6 +17,12 @@ export interface Product {
   storyImage?: string; // 스토리 이미지 URL
 }
 
+// 카테고리 타입
+export interface Category {
+  id: number;
+  name: string;
+}
+
 // 상세 상품 조회 액션
 export const fetchProductDetail = createAsyncThunk<Product, number>(
   "products/fetchProductDetail",
@@ -32,6 +38,30 @@ export const fetchMyProducts = createAsyncThunk<Product[]>(
   async () => {
     const response = await axiosInstance.get("/product/my");
     return response.data;
+  }
+);
+
+// 카테고리 목록 조회 액션
+export const fetchCategories = createAsyncThunk<Category[]>(
+  "products/fetchCategories",
+  async () => {
+    const response = await axiosInstance.get("/categories");
+    return response.data;
+  }
+);
+
+// 상품 생성 액션
+export const createProduct = createAsyncThunk<Product, FormData>(
+  "products/createProduct",
+  async (productData, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post("/products", productData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data || "상품 생성 실패");
+    }
   }
 );
 
@@ -68,6 +98,7 @@ export const fetchProducts = createAsyncThunk<Product[]>(
 interface ProductState {
   products: Product[];
   myProducts: Product[];
+  categories: Category[];
   selectedProduct: Product | null;
   isLoading: boolean;
   error: string | null;
@@ -76,6 +107,7 @@ interface ProductState {
 const initialState: ProductState = {
   products: [],
   myProducts: [],
+  categories: [],
   selectedProduct: null,
   isLoading: false,
   error: null,
@@ -126,6 +158,23 @@ const productSlice = createSlice({
       .addCase(fetchMyProducts.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.error.message || "내 상품을 불러오는데 실패했습니다.";
+      })
+      // 카테고리 조회
+      .addCase(fetchCategories.fulfilled, (state, action) => {
+        state.categories = action.payload;
+      })
+      // 상품 생성
+      .addCase(createProduct.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(createProduct.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.myProducts.push(action.payload); // 내 상품 목록에 추가
+      })
+      .addCase(createProduct.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = (action.payload as string) || "상품 생성에 실패했습니다.";
       });
   },
 });
