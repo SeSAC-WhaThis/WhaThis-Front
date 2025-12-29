@@ -17,5 +17,6 @@ export const PATH = {
     FUNDINGPAGE: "/products/fundingPage",
     PREORDERPAGE: "/products/preorderPage",
     DETAIL: (productId: number) => `/product/detail/${productId}`,
+    CREATE: "/product/create",
   },
 } as const;

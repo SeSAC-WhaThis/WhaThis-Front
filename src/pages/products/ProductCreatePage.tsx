@@ -1,0 +1,372 @@
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate, useBlocker } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { createProduct, fetchCategories } from "../../store/productSlice";
+import type { RootState } from "../../store";
+import type { ThunkDispatch } from "@reduxjs/toolkit";
+import { PATH } from "../../constants/path";
+
+const ProductCreatePage: React.FC = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch<ThunkDispatch<any, any, any>>();
+
+  // 입력 상태 관리
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [categoryId, setCategoryId] = useState<number | "">("");
+  const [goalAmount, setGoalAmount] = useState<string>("");
+  const [endDate, setEndDate] = useState("");
+  const [thumbnailImage, setThumbnailImage] = useState<File | null>(null);
+  const [storyImage, setStoryImage] = useState<File | null>(null);
+
+  // 제출 완료 여부 (제출 성공 시에는 블로킹하지 않기 위함)
+  const isSubmittedRef = useRef(false);
+
+  // 이미지 미리보기 상태
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
+  const [storyPreview, setStoryPreview] = useState<string | null>(null);
+
+  // 에러 상태 관리
+  const [errors, setErrors] = useState({
+    title: "",
+    description: "",
+    categoryId: "",
+    goalAmount: "",
+    endDate: "",
+    thumbnailImage: "",
+    storyImage: "",
+  });
+
+  // Redux 상태
+  const { categories, isLoading } = useSelector(
+    (state: RootState) => state.products
+  );
+
+  // 카테고리 목록 가져오기
+  useEffect(() => {
+    dispatch(fetchCategories());
+  }, [dispatch]);
+
+  // 파일 선택 핸들러
+  const handleFileChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    setFile: React.Dispatch<React.SetStateAction<File | null>>,
+    setPreview: React.Dispatch<React.SetStateAction<string | null>>
+  ) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setFile(file);
+      setPreview(URL.createObjectURL(file));
+    }
+  };
+
+  // 목표 금액 입력 핸들러 (천 단위 콤마)
+  const handleGoalAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/,/g, "");
+    if (value === "") {
+      setGoalAmount("");
+      return;
+    }
+    if (!isNaN(Number(value))) {
+      setGoalAmount(Number(value).toLocaleString());
+    }
+  };
+
+  const validateForm = () => {
+    let isValid = true;
+    const newErrors = {
+      title: "",
+      description: "",
+      categoryId: "",
+      goalAmount: "",
+      endDate: "",
+      thumbnailImage: "",
+      storyImage: "",
+    };
+
+    if (!title.trim()) {
+      newErrors.title = "프로젝트 이름을 입력해주세요.";
+      isValid = false;
+    }
+
+    if (!categoryId) {
+      newErrors.categoryId = "카테고리를 선택해주세요.";
+      isValid = false;
+    }
+
+    const amount = Number(goalAmount.replace(/,/g, ""));
+    if (!amount || amount <= 0) {
+      newErrors.goalAmount = "목표 금액은 0원보다 커야 합니다.";
+      isValid = false;
+    }
+
+    if (!endDate) {
+      newErrors.endDate = "펀딩 종료일을 선택해주세요.";
+      isValid = false;
+    }
+
+    if (!description.trim()) {
+      newErrors.description = "프로젝트 설명을 입력해주세요.";
+      isValid = false;
+    }
+
+    if (!thumbnailImage) {
+      newErrors.thumbnailImage = "대표 이미지를 업로드해주세요.";
+      isValid = false;
+    }
+
+    if (!storyImage) {
+      newErrors.storyImage = "스토리 이미지를 업로드해주세요.";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
+  // 폼에 작성된 내용이 있는지 확인 (Dirty Check)
+  const isFormDirty =
+    title !== "" ||
+    description !== "" ||
+    categoryId !== "" ||
+    goalAmount !== "" ||
+    endDate !== "" ||
+    thumbnailImage !== null ||
+    storyImage !== null;
+
+  // 1. 브라우저 새로고침/닫기 방지
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isFormDirty && !isSubmittedRef.current) {
+        e.preventDefault();
+        e.returnValue = ""; // Chrome에서는 이 설정이 필요함
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isFormDirty]);
+
+  // 2. 앱 내 페이지 이동 방지 (useBlocker)
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      isFormDirty &&
+      !isSubmittedRef.current &&
+      currentLocation.pathname !== nextLocation.pathname
+  );
+
+  useEffect(() => {
+    if (blocker.state === "blocked") {
+      const confirm = window.confirm(
+        "작성 중인 내용이 있습니다. 정말 떠나시겠습니까?"
+      );
+      if (confirm) blocker.proceed();
+      else blocker.reset();
+    }
+  }, [blocker]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("description", description);
+    formData.append("categoryId", String(categoryId));
+    formData.append("goalAmount", goalAmount.replace(/,/g, ""));
+    formData.append("endDate", endDate);
+    if (thumbnailImage) formData.append("thumbnailImage", thumbnailImage);
+    if (storyImage) formData.append("storyImage", storyImage);
+
+    try {
+      await dispatch(createProduct(formData)).unwrap();
+      isSubmittedRef.current = true; // 제출 성공 처리
+      alert("프로젝트가 성공적으로 생성되었습니다.");
+      navigate(PATH.AUTH.PROFILE); // 생성 후 프로필 페이지(내 프로젝트 목록)로 이동
+    } catch (error) {
+      alert("프로젝트 생성 실패: " + error);
+    }
+  };
+
+  // 오늘 날짜 (YYYY-MM-DD) - 로컬 시간 기준
+  const today = new Date(
+    new Date().getTime() - new Date().getTimezoneOffset() * 60000
+  )
+    .toISOString()
+    .split("T")[0];
+
+  return (
+    <div className="mx-auto px-4 py-12 w-full max-w-2xl">
+      <h1 className="text-3xl font-bold !mb-16 text-center">프로젝트 만들기</h1>
+
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col gap-12 bg-white p-8 rounded-lg shadow-sm border border-gray-100"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* 프로젝트명 */}
+          <div>
+            <label className="block text-base font-bold text-gray-800 mb-2">
+              프로젝트명
+            </label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full border border-gray-300 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#00cfcf] transition-shadow"
+              placeholder="프로젝트 이름을 입력하세요"
+            />
+            {errors.title && (
+              <p className="text-red-500 text-sm mt-1">{errors.title}</p>
+            )}
+          </div>
+
+          {/* 카테고리 */}
+          <div>
+            <label className="block text-base font-bold text-gray-800 mb-2">
+              카테고리
+            </label>
+            <select
+              value={categoryId}
+              onChange={(e) => setCategoryId(Number(e.target.value))}
+              className="w-full border border-gray-300 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#00cfcf] bg-white transition-shadow"
+            >
+              <option value="">카테고리를 선택해주세요</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+            {errors.categoryId && (
+              <p className="text-red-500 text-sm mt-1">{errors.categoryId}</p>
+            )}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* 목표 금액 */}
+          <div>
+            <label className="block text-base font-bold text-gray-800 mb-2">
+              목표 금액
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                value={goalAmount}
+                onChange={handleGoalAmountChange}
+                className="w-full border border-gray-300 rounded-md px-4 py-3 pr-10 focus:outline-none focus:ring-2 focus:ring-[#00cfcf] transition-shadow"
+                placeholder="0"
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">
+                원
+              </span>
+            </div>
+            {errors.goalAmount && (
+              <p className="text-red-500 text-sm mt-1">{errors.goalAmount}</p>
+            )}
+          </div>
+
+          {/* 펀딩 종료일 */}
+          <div>
+            <label className="block text-base font-bold text-gray-800 mb-2">
+              펀딩 종료일
+            </label>
+            <input
+              type="date"
+              value={endDate}
+              min={today}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="w-full border border-gray-300 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#00cfcf] transition-shadow"
+            />
+            {errors.endDate && (
+              <p className="text-red-500 text-sm mt-1">{errors.endDate}</p>
+            )}
+          </div>
+        </div>
+
+        {/* 프로젝트 설명 */}
+        <div>
+          <label className="block text-base font-bold text-gray-800 mb-2">
+            프로젝트 설명
+          </label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="w-full border border-gray-300 rounded-md px-4 py-3 h-40 resize-none focus:outline-none focus:ring-2 focus:ring-[#00cfcf] transition-shadow"
+            placeholder="프로젝트에 대한 상세한 설명을 작성해주세요"
+          />
+          {errors.description && (
+            <p className="text-red-500 text-sm mt-1">{errors.description}</p>
+          )}
+        </div>
+
+        {/* 이미지 업로드 섹션 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-base font-bold text-gray-800 mb-2">
+              대표 이미지
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) =>
+                handleFileChange(e, setThumbnailImage, setThumbnailPreview)
+              }
+              className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#e7f9f9] file:text-[#00cfcf] hover:file:bg-[#d0f0f0] cursor-pointer"
+            />
+            {errors.thumbnailImage && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.thumbnailImage}
+              </p>
+            )}
+            {thumbnailPreview && (
+              <div className="mt-4">
+                <img
+                  src={thumbnailPreview}
+                  alt="대표 이미지 미리보기"
+                  className="w-full h-48 object-cover rounded-md border border-gray-200"
+                />
+              </div>
+            )}
+          </div>
+          <div>
+            <label className="block text-base font-bold text-gray-800 mb-2">
+              스토리 이미지
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) =>
+                handleFileChange(e, setStoryImage, setStoryPreview)
+              }
+              className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#e7f9f9] file:text-[#00cfcf] hover:file:bg-[#d0f0f0] cursor-pointer"
+            />
+            {errors.storyImage && (
+              <p className="text-red-500 text-sm mt-1">{errors.storyImage}</p>
+            )}
+            {storyPreview && (
+              <div className="mt-4">
+                <img
+                  src={storyPreview}
+                  alt="스토리 이미지 미리보기"
+                  className="w-full h-auto object-cover rounded-md border border-gray-200"
+                />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* 제출 버튼 */}
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="w-full bg-[#00b0b0] text-white font-bold text-lg py-4 rounded-md hover:bg-[#009090] transition-colors mt-6 shadow-md"
+        >
+          {isLoading ? "생성 중..." : "프로젝트 생성하기"}
+        </button>
+      </form>
+    </div>
+  );
+};
+
+export default ProductCreatePage;
