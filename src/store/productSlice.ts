@@ -46,7 +46,17 @@ export const fetchCategories = createAsyncThunk<Category[]>(
   "products/fetchCategories",
   async () => {
     const response = await axiosInstance.get("/categories");
-    return response.data;
+    const data = response.data;
+    console.log("카테고리 API 응답:", data); // 콘솔에서 데이터 구조 확인용
+
+    // 1. 바로 배열인 경우
+    if (Array.isArray(data)) return data;
+    // 2. data 프로퍼티 안에 배열이 있는 경우 (예: { data: [...] })
+    if (data && Array.isArray(data.data)) return data.data;
+    // 3. result 프로퍼티 안에 배열이 있는 경우 (예: { result: [...] })
+    if (data && Array.isArray(data.result)) return data.result;
+
+    return []; // 배열을 찾지 못하면 빈 배열 반환
   }
 );
 
@@ -163,6 +173,9 @@ const productSlice = createSlice({
       // 카테고리 조회
       .addCase(fetchCategories.fulfilled, (state, action) => {
         state.categories = Array.isArray(action.payload) ? action.payload : [];
+      })
+      .addCase(fetchCategories.rejected, (state, action) => {
+        state.error = action.error.message || "카테고리 로딩 실패";
       })
       // 상품 생성
       .addCase(createProduct.pending, (state) => {
