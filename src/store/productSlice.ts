@@ -36,7 +36,7 @@ export const fetchProductDetail = createAsyncThunk<Product, number>(
 export const fetchMyProducts = createAsyncThunk<Product[]>(
   "products/fetchMyProducts",
   async () => {
-    const response = await axiosInstance.get("/product/my");
+    const response = await axiosInstance.get("/products/my");
     return response.data;
   }
 );
@@ -157,7 +157,8 @@ const productSlice = createSlice({
       })
       .addCase(fetchMyProducts.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || "내 상품을 불러오는데 실패했습니다.";
+        state.error =
+          action.error.message || "내 상품을 불러오는데 실패했습니다.";
       })
       // 카테고리 조회
       .addCase(fetchCategories.fulfilled, (state, action) => {
