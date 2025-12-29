@@ -106,15 +106,22 @@ const ProductCreatePage: React.FC = () => {
   const validateForm = () => {
     let isValid = true;
     const newErrors = {
+      brn: "",
       title: "",
       description: "",
       categoryId: "",
       goalAmount: "",
-      endDate: "",
       inventory: "",
+      startDate: "",
+      endDate: "",
       thumbnailImage: "",
       storyImage: "",
     };
+
+    if (!brn.trim()) {
+      newErrors.brn = "사업자등록번호를 입력해주세요.";
+      isValid = false;
+    }
 
     if (!title.trim()) {
       newErrors.title = "프로젝트 이름을 입력해주세요.";
@@ -134,11 +141,6 @@ const ProductCreatePage: React.FC = () => {
 
     if (!inventory || Number(inventory) <= 0) {
       newErrors.inventory = "재고는 0개보다 많아야 합니다.";
-      isValid = false;
-    }
-
-    if (!startDate) {
-      newErrors.startDate = "펀딩 시작일을 선택해주세요.";
       isValid = false;
     }
 
