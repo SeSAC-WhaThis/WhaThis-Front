@@ -15,6 +15,7 @@ const ProductCreatePage: React.FC = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState<number | "">("");
+  const [price, setPrice] = useState<string>("");
   const [goalAmount, setGoalAmount] = useState<string>("");
   const [inventory, setInventory] = useState<number | "">("");
   const [startDate, setStartDate] = useState("");
@@ -35,6 +36,7 @@ const ProductCreatePage: React.FC = () => {
     title: "",
     description: "",
     categoryId: "",
+    price: "",
     goalAmount: "",
     inventory: "",
     startDate: "",
@@ -91,6 +93,18 @@ const ProductCreatePage: React.FC = () => {
     setBrn(formattedValue);
   };
 
+  // 가격 입력 핸들러 (천 단위 콤마)
+  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/,/g, "");
+    if (value === "") {
+      setPrice("");
+      return;
+    }
+    if (!isNaN(Number(value))) {
+      setPrice(Number(value).toLocaleString());
+    }
+  };
+
   // 목표 금액 입력 핸들러 (천 단위 콤마)
   const handleGoalAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/,/g, "");
@@ -110,6 +124,7 @@ const ProductCreatePage: React.FC = () => {
       title: "",
       description: "",
       categoryId: "",
+      price: "",
       goalAmount: "",
       inventory: "",
       startDate: "",
@@ -130,6 +145,12 @@ const ProductCreatePage: React.FC = () => {
 
     if (!categoryId) {
       newErrors.categoryId = "카테고리를 선택해주세요.";
+      isValid = false;
+    }
+
+    const priceAmount = Number(price.replace(/,/g, ""));
+    if (!priceAmount || priceAmount <= 0) {
+      newErrors.price = "가격을 입력해주세요.";
       isValid = false;
     }
 
@@ -188,6 +209,7 @@ const ProductCreatePage: React.FC = () => {
     title !== "" ||
     description !== "" ||
     categoryId !== "" ||
+    price !== "" ||
     goalAmount !== "" ||
     startDate !== "" ||
     endDate !== "" ||
@@ -234,6 +256,7 @@ const ProductCreatePage: React.FC = () => {
     formData.append("title", title);
     formData.append("description", description);
     formData.append("categoryId", String(categoryId));
+    formData.append("price", price.replace(/,/g, ""));
     formData.append("goalAmount", goalAmount.replace(/,/g, ""));
     formData.append("inventory", String(inventory));
     formData.append("startDate", startDate);
@@ -327,6 +350,28 @@ const ProductCreatePage: React.FC = () => {
             <p className="text-red-500 text-sm mt-1">
               카테고리 로딩 실패: {apiError}
             </p>
+          )}
+        </div>
+
+        {/* 가격 */}
+        <div>
+          <label className="block text-base font-bold text-gray-800 mb-2">
+            가격
+          </label>
+          <div className="relative">
+            <input
+              type="text"
+              value={price}
+              onChange={handlePriceChange}
+              className="w-full border border-gray-300 rounded-md px-4 py-3 pr-10 focus:outline-none focus:ring-2 focus:ring-[#00cfcf] transition-shadow"
+              placeholder="0"
+            />
+            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">
+              원
+            </span>
+          </div>
+          {errors.price && (
+            <p className="text-red-500 text-sm mt-1">{errors.price}</p>
           )}
         </div>
 
