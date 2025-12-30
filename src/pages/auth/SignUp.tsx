@@ -76,7 +76,7 @@ const SignUp = () => {
           navigate(PATH.AUTH.LOGIN);
         })
         .catch((err: any) => {
-          alert(`회원가입 실패: ${err}`);
+          alert(err || "회원가입에 실패했습니다.");
         });
     }
   };
