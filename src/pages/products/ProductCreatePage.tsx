@@ -261,7 +261,6 @@ const ProductCreatePage: React.FC = () => {
     formData.append("inventory", String(inventory));
     formData.append("startDate", startDate);
     formData.append("endDate", endDate);
-    formData.append("description", description);
     if (thumbnailImage) formData.append("thumbnailImage", thumbnailImage);
     if (storyImage) formData.append("storyImage", storyImage);
 

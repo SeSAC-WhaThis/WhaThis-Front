@@ -68,9 +68,7 @@ export const createProduct = createAsyncThunk<Product, FormData>(
   "products/createProduct",
   async (productData, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post("/products", productData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const response = await axiosInstance.post("/products", productData);
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data || "상품 생성 실패");
