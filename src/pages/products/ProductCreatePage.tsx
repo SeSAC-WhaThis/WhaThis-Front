@@ -41,8 +41,8 @@ const ProductCreatePage: React.FC = () => {
     inventory: "",
     startDate: "",
     endDate: "",
-    thumbnailImage: "",
-    storyImage: "",
+    thumbnailImageUrl: "",
+    storyImageUrl: "",
   });
 
   // Redux 상태
@@ -129,8 +129,8 @@ const ProductCreatePage: React.FC = () => {
       inventory: "",
       startDate: "",
       endDate: "",
-      thumbnailImage: "",
-      storyImage: "",
+      thumbnailImageUrl: "",
+      storyImageUrl: "",
     };
 
     if (!brn.trim()) {
@@ -190,12 +190,12 @@ const ProductCreatePage: React.FC = () => {
     }
 
     if (!thumbnailImage) {
-      newErrors.thumbnailImage = "대표 이미지를 업로드해주세요.";
+      newErrors.thumbnailImageUrl = "대표 이미지를 업로드해주세요.";
       isValid = false;
     }
 
     if (!storyImage) {
-      newErrors.storyImage = "스토리 이미지를 업로드해주세요.";
+      newErrors.storyImageUrl = "스토리 이미지를 업로드해주세요.";
       isValid = false;
     }
 
@@ -259,10 +259,10 @@ const ProductCreatePage: React.FC = () => {
     formData.append("price", price.replace(/,/g, ""));
     formData.append("goalAmount", goalAmount.replace(/,/g, ""));
     formData.append("inventory", String(inventory));
-    formData.append("startDate", startDate);
-    formData.append("endDate", endDate);
-    if (thumbnailImage) formData.append("thumbnailImage", thumbnailImage);
-    if (storyImage) formData.append("storyImage", storyImage);
+    formData.append("startDate", `${startDate}T00:00:00`);
+    formData.append("endDate", `${endDate}T23:59:59`);
+    if (thumbnailImage) formData.append("thumbnailImageUrl", thumbnailImage);
+    if (storyImage) formData.append("storyImageUrl", storyImage);
 
     try {
       await dispatch(createProduct(formData)).unwrap();
@@ -477,9 +477,9 @@ const ProductCreatePage: React.FC = () => {
               }
               className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#e7f9f9] file:text-[#00cfcf] hover:file:bg-[#d0f0f0] cursor-pointer"
             />
-            {errors.thumbnailImage && (
+            {errors.thumbnailImageUrl && (
               <p className="text-red-500 text-sm mt-1">
-                {errors.thumbnailImage}
+                {errors.thumbnailImageUrl}
               </p>
             )}
             {thumbnailPreview && (
@@ -504,8 +504,8 @@ const ProductCreatePage: React.FC = () => {
               }
               className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#e7f9f9] file:text-[#00cfcf] hover:file:bg-[#d0f0f0] cursor-pointer"
             />
-            {errors.storyImage && (
-              <p className="text-red-500 text-sm mt-1">{errors.storyImage}</p>
+            {errors.storyImageUrl && (
+              <p className="text-red-500 text-sm mt-1">{errors.storyImageUrl}</p>
             )}
             {storyPreview && (
               <div className="mt-4">
