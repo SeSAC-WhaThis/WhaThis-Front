@@ -6,6 +6,7 @@ import PreorderPage from "../../pages/products/PreorderPage";
 import ProductDetailPage from "../../pages/products/ProductDetailPage";
 import ProfilePage from "../../pages/auth/ProfilePage";
 import ProductCreatePage from "../../pages/products/ProductCreatePage";
+import SellerProfile from "../../pages/auth/SellerProfile";
 import { PATH } from "../../constants/path";
 import { Component } from "react";
 
@@ -41,6 +42,10 @@ const rootRoutes = [
       {
         path: PATH.PRODUCT.CREATE,
         Component: ProductCreatePage,
+      },
+      {
+        path: "/users/profile/:sellerId",
+        Component: SellerProfile,
       },
     ],
   },

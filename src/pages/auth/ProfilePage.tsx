@@ -1,26 +1,17 @@
-import React, { useEffect, useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import ProductList from "../../components/products/ProductList";
-import { fetchMyProducts } from "../../store/productSlice";
+import React, { useState } from "react";
+import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
-import type { ThunkDispatch } from "@reduxjs/toolkit";
 import defaultavatar from "../../assets/icons/defaultavatar.png";
+import MyProjects from "../../components/profile/MyProjects";
+import MyFunding from "../../components/profile/MyFunding";
+import UpdateProfile from "./UpdateProfile";
+import FollowList from "../../components/profile/FollowList";
 
 const ProfilePage: React.FC = () => {
-  const dispatch = useDispatch<ThunkDispatch<any, any, any>>();
-  const navigate = useNavigate();
   const { user } = useSelector((state: RootState) => state.auth);
-  const { myProducts, isLoading } = useSelector(
-    (state: RootState) => state.products
-  );
-  const [activeTab, setActiveTab] = useState<"project" | "funding">("project");
-
-  useEffect(() => {
-    if (activeTab === "project") {
-      dispatch(fetchMyProducts());
-    }
-  }, [dispatch, activeTab]);
+  const [activeTab, setActiveTab] = useState<
+    "project" | "funding" | "update" | "following" | "follower"
+  >("project");
 
   if (!user) {
     return <div className="p-8 text-center">로그인이 필요한 페이지입니다.</div>;
@@ -44,7 +35,18 @@ const ProfilePage: React.FC = () => {
               (e.currentTarget as HTMLImageElement).src = defaultavatar;
             }}
           />
-          <h2 className="text-xl font-bold text-gray-900">{nickname}</h2>
+          <div
+            className="flex items-center gap-2 cursor-pointer group"
+            onClick={() => setActiveTab("update")}
+            title="프로필 수정하기"
+          >
+            <h2 className="text-xl font-bold text-gray-900 group-hover:text-[#00cfcf] transition-colors">
+              {nickname}
+            </h2>
+            <span className="text-xs text-gray-400 group-hover:text-[#00cfcf] transition-colors">
+              ✎
+            </span>
+          </div>
         </div>
 
         {/* 메뉴 */}
@@ -69,38 +71,50 @@ const ProfilePage: React.FC = () => {
           >
             내 펀딩
           </button>
+          <button
+            className={`p-4 text-left transition-colors ${
+              activeTab === "following"
+                ? "bg-gray-100 font-bold text-[#00cfcf]"
+                : "hover:bg-gray-50 text-gray-700"
+            }`}
+            onClick={() => setActiveTab("following")}
+          >
+            팔로잉
+          </button>
+          <button
+            className={`p-4 text-left transition-colors ${
+              activeTab === "follower"
+                ? "bg-gray-100 font-bold text-[#00cfcf]"
+                : "hover:bg-gray-50 text-gray-700"
+            }`}
+            onClick={() => setActiveTab("follower")}
+          >
+            팔로워
+          </button>
+          <button
+            className={`p-4 text-left transition-colors ${
+              activeTab === "update"
+                ? "bg-gray-100 font-bold text-[#00cfcf]"
+                : "hover:bg-gray-50 text-gray-700"
+            }`}
+            onClick={() => setActiveTab("update")}
+          >
+            프로필 수정
+          </button>
         </div>
       </div>
 
       {/* 오른쪽 컨텐츠 */}
       <div className="w-full md:w-3/4">
-        {activeTab === "project" && (
-          <div>
-            <div className="flex justify-between items-center mb-6 border-b pb-4">
-              <h2 className="text-2xl font-bold">내가 만든 프로젝트</h2>
-              <button
-                onClick={() => navigate("/product/create")}
-                className="px-6 py-2 bg-[#00cfcf] text-white rounded-md hover:bg-[#00afaf] transition-colors font-bold"
-              >
-                프로젝트 만들기
-              </button>
-            </div>
-            {isLoading ? (
-              <div className="text-center py-8">Loading...</div>
-            ) : (
-              <ProductList products={myProducts} />
-            )}
-          </div>
-        )}
-        {activeTab === "funding" && (
-          <div>
-            <h2 className="text-2xl font-bold mb-6 border-b pb-4">
-              내 펀딩 내역
-            </h2>
-            <div className="text-gray-500 py-8 text-center">
-              참여한 펀딩 내역이 없습니다.
-            </div>
-          </div>
+        {activeTab === "project" && <MyProjects />}
+        {activeTab === "funding" && <MyFunding />}
+        {activeTab === "following" && <FollowList type="following" />}
+        {activeTab === "follower" && <FollowList type="follower" />}
+        {activeTab === "update" && (
+          <UpdateProfile
+            onCancel={() => setActiveTab("project")}
+            onSuccess={() => setActiveTab("project")}
+          />
         )}
       </div>
     </div>

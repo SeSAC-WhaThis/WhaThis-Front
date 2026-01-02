@@ -12,7 +12,7 @@ const PreorderPage: React.FC = () => {
   );
 
   // PRE_ORDER 타입만 필터링
-  const preOrderProducts = products.filter((p) => p.type === "PRE_ORDER");
+  const preOrderProducts = products;
 
   useEffect(() => {
     dispatch(fetchProducts());

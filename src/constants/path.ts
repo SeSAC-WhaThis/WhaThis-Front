@@ -1,22 +1,15 @@
-import FundingPage from "../pages/products/FundingPage";
-
 export const PATH = {
   MAIN: "/",
-  ABOUT: "/about",
-  TODO: "/todo/",
-  FUNDING: "/funding",
-  PREORDER: "/preorder",
   AUTH: {
-    LOGIN: "/auth/login",
-    KAKAO_CALLBACK: "/oauth/kakao/callback",
-    SIGNUP: "/auth/signup",
-    PROFILE: "/auth/profile",
+    LOGIN: "/login",
+    SIGNUP: "/signup",
+    PROFILE: "/profile",
+    SELLER_PROFILE: (sellerId: string | number) => `/users/profile/${sellerId}`,
   },
   PRODUCT: {
-    INDEX: "/products",
-    FUNDINGPAGE: "/products/fundingPage",
-    PREORDERPAGE: "/products/preorderPage",
-    DETAIL: (productId: number) => `/product/detail/${productId}`,
+    FUNDINGPAGE: "/funding",
+    PREORDERPAGE: "/preorder",
     CREATE: "/product/create",
+    DETAIL: (productId: string | number) => `/product/${productId}`,
   },
-} as const;
+};

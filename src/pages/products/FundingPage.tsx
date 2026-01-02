@@ -12,9 +12,6 @@ const FundingPage: React.FC = () => {
     (state: RootState) => state.products
   );
 
-  // FUNDING 타입만 필터링
-  const fundingProducts = products;
-
   useEffect(() => {
     dispatch(fetchProducts());
   }, [dispatch]);
@@ -22,11 +19,7 @@ const FundingPage: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-4xl font-bold mb-8 border-b pb-4">펀딩+</h1>
-      {isLoading ? (
-        <div>Loading...</div>
-      ) : (
-        <ProductList products={fundingProducts} />
-      )}
+      {isLoading ? <div>Loading...</div> : <ProductList products={products} />}
     </div>
   );
 };

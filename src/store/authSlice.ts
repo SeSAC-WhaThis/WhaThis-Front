@@ -12,6 +12,8 @@ export interface User {
   nickname: string;
   email: string;
   name: string;
+  phoneNumber?: string;
+  address?: string;
   profileImageUrl?: string;
   [key: string]: any; // 추가 필드 허용
 }
@@ -150,6 +152,21 @@ export const signup = createAsyncThunk<
   }
 });
 
+// 프로필 수정 비동기 액션
+export const updateProfile = createAsyncThunk<
+  User,
+  any,
+  { rejectValue: string }
+>("auth/updateProfile", async (userData, { rejectWithValue }) => {
+  try {
+    const response = await axiosInstance.patch("/users/profile", userData);
+    // 응답 데이터 구조에 따라 response.data 또는 response.data.data 등을 반환
+    return response.data.user || response.data.data || response.data;
+  } catch (error: any) {
+    return rejectWithValue(error.response?.data?.message ?? "프로필 수정 실패");
+  }
+});
+
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -235,6 +252,19 @@ const authSlice = createSlice({
         }
       )
       .addCase(login.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      // 프로필 수정
+      .addCase(updateProfile.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateProfile.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = { ...state.user, ...action.payload }; // 기존 정보에 덮어쓰기
+      })
+      .addCase(updateProfile.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });
