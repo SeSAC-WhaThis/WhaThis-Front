@@ -68,9 +68,20 @@ export const createProduct = createAsyncThunk<Product, FormData>(
   "products/createProduct",
   async (productData, { rejectWithValue }) => {
     try {
+      // 디버깅: 전송되는 데이터 확인
+      if (productData instanceof FormData) {
+        console.log("--- createProduct FormData ---");
+        productData.forEach((value, key) => {
+          console.log(`${key}:`, value);
+        });
+      } else {
+        console.log("createProduct payload (not FormData):", productData);
+      }
+
       const response = await axiosInstance.post("/products", productData);
       return response.data;
     } catch (error: any) {
+      console.error("상품 생성 에러 상세:", error);
       return rejectWithValue(error.response?.data || "상품 생성 실패");
     }
   }
