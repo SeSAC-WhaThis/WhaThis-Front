@@ -8,7 +8,7 @@ const axiosInstance = axios.create({
 // 요청 인터셉터 추가
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("accessToken");
+    const token = localStorage.getItem("token");
     console.log("API 요청 인터셉터 - 토큰 확인:", token ? "있음" : "없음"); // 디버깅용 로그
 
     if (token) {
