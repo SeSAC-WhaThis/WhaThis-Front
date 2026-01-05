@@ -4,6 +4,7 @@ export const PATH = {
     LOGIN: "/login",
     SIGNUP: "/signup",
     PROFILE: "/profile",
+    KAKAO_CALLBACK: "/oauth/callback/kakao",
     SELLER_PROFILE: (sellerId: string | number) => `/users/profile/${sellerId}`,
   },
   PRODUCT: {
