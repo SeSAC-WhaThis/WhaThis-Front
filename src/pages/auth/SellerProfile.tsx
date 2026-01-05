@@ -93,7 +93,7 @@ const SellerProfile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await axiosInstance.get(`/products/user/${sellerId}`);
+        const response = await axiosInstance.get(`/products/users/${sellerId}`);
         if (response.data.success) {
           setProfile(response.data.data);
         }
