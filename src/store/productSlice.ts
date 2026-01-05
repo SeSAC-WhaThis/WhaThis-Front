@@ -17,7 +17,7 @@ export interface Product {
   category: Category;
   type?: string; // 펀딩 타입 (예: 리워드, 기부 등)
   description?: string; // 상품 설명
-  storyImage?: string; // 스토리 이미지 URL
+  storyImageUrl?: string; // 스토리 이미지 URL
 }
 
 // 카테고리 타입
