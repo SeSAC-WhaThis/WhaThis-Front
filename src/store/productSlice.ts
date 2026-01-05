@@ -80,7 +80,8 @@ export const createProduct = createAsyncThunk<Product, FormData>(
 
       const response = await axiosInstance.post("/products", productData, {
         headers: {
-          "Content-Type": "multipart/form-data",
+          // undefined로 설정하면 브라우저가 자동으로 boundary를 포함한 multipart/form-data를 설정합니다.
+          "Content-Type": undefined,
         },
       });
       return response.data;
