@@ -188,16 +188,16 @@ const SellerProfile = () => {
       <div>
         <h2 className="text-xl font-bold mb-6 text-gray-900">
           진행 중인 프로젝트{" "}
-          <span className="text-[#00cfcf]">{profile.products.length}</span>
+          <span className="text-[#00cfcf]">{(profile.products || []).length}</span>
         </h2>
 
-        {profile.products.length === 0 ? (
+        {(profile.products || []).length === 0 ? (
           <div className="text-center py-20 bg-gray-50 rounded-xl text-gray-500">
             진행 중인 프로젝트가 없습니다.
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {profile.products.map((product) => (
+            {(profile.products || []).map((product) => (
               <div
                 key={product.id}
                 className="group bg-white rounded-xl overflow-hidden border border-gray-200 hover:shadow-lg transition-all duration-300 cursor-pointer"
