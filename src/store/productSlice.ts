@@ -78,7 +78,11 @@ export const createProduct = createAsyncThunk<Product, FormData>(
         console.log("createProduct payload (not FormData):", productData);
       }
 
-      const response = await axiosInstance.post("/products", productData);
+      const response = await axiosInstance.post("/products", productData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       return response.data;
     } catch (error: any) {
       console.error("상품 생성 에러 상세:", error);
