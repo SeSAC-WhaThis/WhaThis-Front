@@ -49,15 +49,24 @@ export const fetchProductDetail = createAsyncThunk<Product, number>(
 // 내 상품 조회 액션
 export const fetchMyProducts = createAsyncThunk<Product[]>(
   "products/fetchMyProducts",
-  async () => {
-    const response = await axiosInstance.get("/products/my");
-    const data = response.data;
-    console.log("내 상품 조회 응답:", data); // 디버깅용 로그
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get("/products/my");
+      const data = response.data;
+      console.log("내 상품 조회 응답:", data); // 디버깅용 로그
 
-    if (Array.isArray(data)) return data;
-    if (data && Array.isArray(data.data)) return data.data;
-    if (data && Array.isArray(data.result)) return data.result;
-    return [];
+      if (Array.isArray(data)) return data;
+      if (data && Array.isArray(data.data)) return data.data;
+      if (data && Array.isArray(data.result)) return data.result;
+      return [];
+    } catch (error: any) {
+      console.error("내 상품 조회 에러 상세:", error);
+      // 서버에서 보낸 구체적인 에러 메시지 확인
+      if (error.response && error.response.data) {
+        console.error("서버 반환 에러 데이터:", error.response.data);
+      }
+      return rejectWithValue(error.response?.data || "내 상품 조회 실패");
+    }
   }
 );
 

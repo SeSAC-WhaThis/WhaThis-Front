@@ -10,6 +10,11 @@ interface ProductItemProps {
 const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
   const navigate = useNavigate();
 
+  // 데이터가 없으면 렌더링하지 않음 (방어 코드)
+  if (!product) {
+    return null;
+  }
+
   const achievePercentage = Math.floor(
     (product.currentAmount / product.goalAmount) * 100
   );
@@ -47,7 +52,9 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
         </div>
 
         <h3 className="text-lg font-bold truncate mb-1">{product.title}</h3>
-        <p className="text-gray-500 text-sm">{product.seller.nickname}</p>
+        <p className="text-gray-500 text-sm">
+          {product.seller?.nickname || product.seller?.name || "판매자"}
+        </p>
       </div>
     </div>
   );
