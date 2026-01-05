@@ -91,21 +91,33 @@ const SellerProfile = () => {
   };
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axiosInstance.get(`/products/users/${sellerId}`);
-        if (response.data.success) {
-          setProfile(response.data.data);
+        // 프로필 정보와 상품 목록을 병렬로 요청
+        const [profileRes, productsRes] = await Promise.all([
+          axiosInstance.get(`/users/profile/${sellerId}`),
+          axiosInstance.get(`/products/user/${sellerId}`),
+        ]);
+
+        if (profileRes.data.success) {
+          const profileData = profileRes.data.data;
+          // 상품 데이터 추출 (응답 구조에 따라 유연하게 처리)
+          const productsData = productsRes.data.data || productsRes.data;
+
+          setProfile({
+            ...profileData,
+            products: Array.isArray(productsData) ? productsData : [],
+          });
         }
       } catch (error) {
-        console.error("프로필 조회 실패:", error);
+        console.error("데이터 조회 실패:", error);
       } finally {
         setLoading(false);
       }
     };
 
     if (sellerId) {
-      fetchProfile();
+      fetchData();
     }
   }, [sellerId]);
 
@@ -154,7 +166,7 @@ const SellerProfile = () => {
             </div>
             <div className="text-center">
               <div className="text-xl font-bold text-gray-900">
-                {(profile.ratingAvg || 0).toFixed(1)}
+                {profile.ratingAvg.toFixed(1)}
               </div>
               <div className="text-sm text-gray-500">평점</div>
             </div>
@@ -163,7 +175,7 @@ const SellerProfile = () => {
                 {new Intl.NumberFormat("ko-KR", {
                   notation: "compact",
                   maximumFractionDigits: 1,
-                }).format(profile.salesTotalAmount || 0)}
+                }).format(profile.salesTotalAmount)}
               </div>
               <div className="text-sm text-gray-500">누적 판매액</div>
             </div>
@@ -188,16 +200,16 @@ const SellerProfile = () => {
       <div>
         <h2 className="text-xl font-bold mb-6 text-gray-900">
           진행 중인 프로젝트{" "}
-          <span className="text-[#00cfcf]">{(profile.products || []).length}</span>
+          <span className="text-[#00cfcf]">{profile.products.length}</span>
         </h2>
 
-        {(profile.products || []).length === 0 ? (
+        {profile.products.length === 0 ? (
           <div className="text-center py-20 bg-gray-50 rounded-xl text-gray-500">
             진행 중인 프로젝트가 없습니다.
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {(profile.products || []).map((product) => (
+            {profile.products.map((product) => (
               <div
                 key={product.id}
                 className="group bg-white rounded-xl overflow-hidden border border-gray-200 hover:shadow-lg transition-all duration-300 cursor-pointer"
