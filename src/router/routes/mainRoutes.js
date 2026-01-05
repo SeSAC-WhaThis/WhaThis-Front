@@ -9,6 +9,7 @@ import ProductCreatePage from "../../pages/products/ProductCreatePage";
 import SellerProfile from "../../pages/auth/SellerProfile";
 import { PATH } from "../../constants/path";
 import { Component } from "react";
+import OrderPage from "../../pages/orders/OrderPage";
 
 const rootRoutes = [
   {
@@ -32,7 +33,7 @@ const rootRoutes = [
         Component: PreorderPage,
       },
       {
-        path: "/product/detail/:productId",
+        path: "/product/:productId",
         Component: ProductDetailPage,
       },
       {
@@ -46,6 +47,10 @@ const rootRoutes = [
       {
         path: "/users/profile/:sellerId",
         Component: SellerProfile,
+      },
+      {
+        path: PATH.PRODUCT.ORDER,
+        Component: OrderPage,
       },
     ],
   },

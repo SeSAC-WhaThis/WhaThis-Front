@@ -13,8 +13,8 @@ export interface Product {
   currentAmount: number; // 현재 금액
   price?: number; // 가격
   inventory?: number; // 재고
-  seller: string; // 판매자
-  category: string;
+  seller: User; // 판매자
+  category: Category;
   type?: string; // 펀딩 타입 (예: 리워드, 기부 등)
   description?: string; // 상품 설명
   storyImage?: string; // 스토리 이미지 URL
@@ -26,12 +26,23 @@ export interface Category {
   name: string;
 }
 
+export interface User {
+  id: number;
+  email: string;
+  name: string;
+  nickname: string;
+  phoneNumber?: string;
+  address?: string;
+  profileImageUrl?: string;
+  brn?: string;
+}
+
 // 상세 상품 조회 액션
 export const fetchProductDetail = createAsyncThunk<Product, number>(
   "products/fetchProductDetail",
   async (productId) => {
     const response = await axiosInstance.get(`/products/${productId}`);
-    return response.data;
+    return response.data.data;
   }
 );
 
@@ -81,7 +92,7 @@ export const fetchProducts = createAsyncThunk<Product[]>(
   "products/fetchProducts",
   async () => {
     const response = await axiosInstance.get("/products");
-    return response.data;
+    return response.data.data;
 
     // // 테스트용 더미 데이터
     // const today = new Date();

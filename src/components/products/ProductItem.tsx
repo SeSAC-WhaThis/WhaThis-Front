@@ -47,7 +47,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
         </div>
 
         <h3 className="text-lg font-bold truncate mb-1">{product.title}</h3>
-        <p className="text-gray-500 text-sm">{product.seller}</p>
+        <p className="text-gray-500 text-sm">{product.seller.nickname}</p>
       </div>
     </div>
   );
