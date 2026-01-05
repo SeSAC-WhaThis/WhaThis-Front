@@ -51,7 +51,13 @@ export const fetchMyProducts = createAsyncThunk<Product[]>(
   "products/fetchMyProducts",
   async () => {
     const response = await axiosInstance.get("/products/my");
-    return response.data;
+    const data = response.data;
+    console.log("내 상품 조회 응답:", data); // 디버깅용 로그
+
+    if (Array.isArray(data)) return data;
+    if (data && Array.isArray(data.data)) return data.data;
+    if (data && Array.isArray(data.result)) return data.result;
+    return [];
   }
 );
 
@@ -79,9 +85,29 @@ export const createProduct = createAsyncThunk<Product, FormData>(
   "products/createProduct",
   async (productData, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post("/products", productData);
+      // 디버깅: 전송되는 데이터 확인
+      if (productData instanceof FormData) {
+        console.log("--- createProduct FormData ---");
+        productData.forEach((value, key) => {
+          console.log(`${key}:`, value);
+        });
+      } else {
+        console.log("createProduct payload (not FormData):", productData);
+      }
+
+      const response = await axiosInstance.post("/products", productData, {
+        headers: {
+          // undefined로 설정하면 브라우저가 자동으로 boundary를 포함한 multipart/form-data를 설정합니다.
+          "Content-Type": undefined,
+        },
+      });
       return response.data;
     } catch (error: any) {
+      console.error("상품 생성 에러 상세:", error);
+      // 서버에서 보낸 구체적인 에러 메시지 확인
+      if (error.response && error.response.data) {
+        console.error("서버 반환 에러 데이터:", error.response.data);
+      }
       return rejectWithValue(error.response?.data || "상품 생성 실패");
     }
   }
@@ -92,7 +118,14 @@ export const fetchProducts = createAsyncThunk<Product[]>(
   "products/fetchProducts",
   async () => {
     const response = await axiosInstance.get("/products");
-    return response.data.data;
+
+    const data = response.data;
+    console.log("전체 상품 조회 응답:", data); // 디버깅용 로그
+
+    if (Array.isArray(data)) return data;
+    if (data && Array.isArray(data.data)) return data.data;
+    if (data && Array.isArray(data.result)) return data.result;
+    return [];
 
     // // 테스트용 더미 데이터
     // const today = new Date();
