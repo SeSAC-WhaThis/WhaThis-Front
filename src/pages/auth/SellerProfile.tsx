@@ -96,7 +96,7 @@ const SellerProfile = () => {
         // 프로필 정보와 상품 목록을 병렬로 요청
         const [profileRes, productsRes] = await Promise.all([
           axiosInstance.get(`/users/profile/${sellerId}`),
-          axiosInstance.get(`/products/user/${sellerId}`),
+          axiosInstance.get(`/products/users/${sellerId}`),
         ]);
 
         if (profileRes.data.success) {
