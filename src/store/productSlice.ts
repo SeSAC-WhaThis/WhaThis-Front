@@ -40,7 +40,13 @@ export const fetchMyProducts = createAsyncThunk<Product[]>(
   "products/fetchMyProducts",
   async () => {
     const response = await axiosInstance.get("/products/my");
-    return response.data;
+    const data = response.data;
+    console.log("내 상품 조회 응답:", data); // 디버깅용 로그
+
+    if (Array.isArray(data)) return data;
+    if (data && Array.isArray(data.data)) return data.data;
+    if (data && Array.isArray(data.result)) return data.result;
+    return [];
   }
 );
 
@@ -101,7 +107,13 @@ export const fetchProducts = createAsyncThunk<Product[]>(
   "products/fetchProducts",
   async () => {
     const response = await axiosInstance.get("/products");
-    return response.data;
+    const data = response.data;
+    console.log("전체 상품 조회 응답:", data); // 디버깅용 로그
+
+    if (Array.isArray(data)) return data;
+    if (data && Array.isArray(data.data)) return data.data;
+    if (data && Array.isArray(data.result)) return data.result;
+    return [];
 
     // // 테스트용 더미 데이터
     // const today = new Date();
