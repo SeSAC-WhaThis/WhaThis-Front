@@ -82,6 +82,10 @@ export const createProduct = createAsyncThunk<Product, FormData>(
       return response.data;
     } catch (error: any) {
       console.error("상품 생성 에러 상세:", error);
+      // 서버에서 보낸 구체적인 에러 메시지 확인
+      if (error.response && error.response.data) {
+        console.error("서버 반환 에러 데이터:", error.response.data);
+      }
       return rejectWithValue(error.response?.data || "상품 생성 실패");
     }
   }
