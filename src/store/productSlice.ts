@@ -53,7 +53,6 @@ export const fetchMyProducts = createAsyncThunk<Product[]>(
     try {
       const response = await axiosInstance.get("/products/my");
       const data = response.data;
-      console.log("내 상품 조회 응답:", data); // 디버깅용 로그
 
       if (Array.isArray(data)) return data;
       if (data && Array.isArray(data.data)) return data.data;
@@ -76,7 +75,6 @@ export const fetchCategories = createAsyncThunk<Category[]>(
   async () => {
     const response = await axiosInstance.get("/categories");
     const data = response.data;
-    console.log("카테고리 API 응답:", data); // 콘솔에서 데이터 구조 확인용
 
     // 1. 바로 배열인 경우
     if (Array.isArray(data)) return data;
@@ -94,16 +92,6 @@ export const createProduct = createAsyncThunk<Product, FormData>(
   "products/createProduct",
   async (productData, { rejectWithValue }) => {
     try {
-      // 디버깅: 전송되는 데이터 확인
-      if (productData instanceof FormData) {
-        console.log("--- createProduct FormData ---");
-        productData.forEach((value, key) => {
-          console.log(`${key}:`, value);
-        });
-      } else {
-        console.log("createProduct payload (not FormData):", productData);
-      }
-
       const response = await axiosInstance.post("/products", productData, {
         headers: {
           // undefined로 설정하면 브라우저가 자동으로 boundary를 포함한 multipart/form-data를 설정합니다.
@@ -129,33 +117,11 @@ export const fetchProducts = createAsyncThunk<Product[]>(
     const response = await axiosInstance.get("/products");
 
     const data = response.data;
-    console.log("전체 상품 조회 응답:", data); // 디버깅용 로그
 
     if (Array.isArray(data)) return data;
     if (data && Array.isArray(data.data)) return data.data;
     if (data && Array.isArray(data.result)) return data.result;
     return [];
-
-    // // 테스트용 더미 데이터
-    // const today = new Date();
-    // const endDate = new Date(today);
-    // endDate.setDate(today.getDate() + 15); // 15일 후 마감
-
-    // return [
-    //   {
-    //     id: 1,
-    //     title: "테스트 펀딩 상품",
-    //     thumbnailImageUrl: "https://via.placeholder.com/300",
-    //     startDate: today.toISOString(),
-    //     endDate: endDate.toISOString(),
-    //     goalAmount: 1000000,
-    //     currentAmount: 350000,
-    //     seller: "테스트 판매자",
-    //     category: "테크/가전",
-    //     type: "리워드",
-    //     description: "이것은 테스트를 위한 더미 데이터입니다.",
-    //   },
-    // ];
   }
 );
 

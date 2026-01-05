@@ -72,13 +72,6 @@ export default function RootMenus() {
 
           {/* 오른쪽(로그인/프로필/로그아웃)도 가운데 그룹에 포함 */}
           <div className="flex items-center gap-4">
-            <button
-              className="text-[18px] font-medium text-black hover:text-[rgb(0,178,178)] transition-colors"
-              onClick={() => dispatch(mockLogin(dummyAuthResponse))}
-            >
-              더미 로그인
-            </button>
-
             {!isLoggedIn ? (
               <NavLink to={PATH.AUTH.LOGIN} className={linkClass}>
                 Login
