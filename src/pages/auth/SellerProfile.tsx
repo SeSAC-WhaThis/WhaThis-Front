@@ -154,7 +154,7 @@ const SellerProfile = () => {
             </div>
             <div className="text-center">
               <div className="text-xl font-bold text-gray-900">
-                {profile.ratingAvg.toFixed(1)}
+                {(profile.ratingAvg || 0).toFixed(1)}
               </div>
               <div className="text-sm text-gray-500">평점</div>
             </div>
@@ -163,7 +163,7 @@ const SellerProfile = () => {
                 {new Intl.NumberFormat("ko-KR", {
                   notation: "compact",
                   maximumFractionDigits: 1,
-                }).format(profile.salesTotalAmount)}
+                }).format(profile.salesTotalAmount || 0)}
               </div>
               <div className="text-sm text-gray-500">누적 판매액</div>
             </div>
