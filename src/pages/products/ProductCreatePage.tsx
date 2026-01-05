@@ -30,6 +30,8 @@ const ProductCreatePage: React.FC = () => {
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const [storyPreview, setStoryPreview] = useState<string | null>(null);
 
+  
+
   // 에러 상태 관리
   const [errors, setErrors] = useState({
     brn: "",
@@ -58,9 +60,10 @@ const ProductCreatePage: React.FC = () => {
   // 카테고리 목록 가져오기
   useEffect(() => {
     if (categories.length === 0) {
+      // categories가 없을때만 fetch
       dispatch(fetchCategories());
     }
-  }, [dispatch, categories.length]);
+  }, [dispatch, categories.length]); // categories.length가 아닌 빈 배열을 의존성으로 넣기
 
   // 파일 선택 핸들러
   const handleFileChange = (
@@ -505,7 +508,9 @@ const ProductCreatePage: React.FC = () => {
               className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#e7f9f9] file:text-[#00cfcf] hover:file:bg-[#d0f0f0] cursor-pointer"
             />
             {errors.storyImageUrl && (
-              <p className="text-red-500 text-sm mt-1">{errors.storyImageUrl}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {errors.storyImageUrl}
+              </p>
             )}
             {storyPreview && (
               <div className="mt-4">

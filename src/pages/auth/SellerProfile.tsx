@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import axios from "axios";
+import axiosInstance from "../../api/axiosInstance";
 import defaultavatar from "../../assets/icons/defaultavatar.png";
 import { PATH } from "../../constants/path";
 import type { RootState } from "../../store";
@@ -65,14 +65,24 @@ const SellerProfile = () => {
         await dispatch(unfollowUser(profile.id)).unwrap();
         setProfile((prev) =>
           prev
-            ? { ...prev, following: false, followerCount: Math.max(0, prev.followerCount - 1) }
+            ? {
+                ...prev,
+                following: false,
+                followerCount: Math.max(0, prev.followerCount - 1),
+              }
             : null
         );
       } else {
         // 팔로우 요청
         await dispatch(followUser(profile.id)).unwrap();
         setProfile((prev) =>
-          prev ? { ...prev, following: true, followerCount: prev.followerCount + 1 } : null
+          prev
+            ? {
+                ...prev,
+                following: true,
+                followerCount: prev.followerCount + 1,
+              }
+            : null
         );
       }
     } catch (error: any) {
@@ -83,7 +93,7 @@ const SellerProfile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await axios.get(`/users/profile/${sellerId}`);
+        const response = await axiosInstance.get(`/users/profile/${sellerId}`);
         if (response.data.success) {
           setProfile(response.data.data);
         }
