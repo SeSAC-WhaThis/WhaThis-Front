@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Product } from "../../store/productSlice";
 import { CiHeart } from "react-icons/ci";
@@ -15,6 +15,7 @@ interface FundingDetailProps {
 
 const FundingDetail: React.FC<FundingDetailProps> = ({ product }) => {
   const navigate = useNavigate();
+  const [quantity, setQuantity] = useState(1);
   // 달성률 계산
   const achievePercentage = Math.floor(
     ((product.currentAmount || 0) / (product.goalAmount || 1)) * 100
@@ -28,6 +29,18 @@ const FundingDetail: React.FC<FundingDetailProps> = ({ product }) => {
     ),
     0
   );
+
+  const handleFundingClick = () => {
+    navigate(PATH.PRODUCT.ORDER, {
+      state: {
+        productId: product.id,
+        productTitle: product.title,
+        quantity: quantity,
+        price: product.price,
+        thumbnailImageUrl: product.thumbnailImageUrl,
+      },
+    });
+  };
 
   // 판매자 정보 처리
   const sellerName =
@@ -101,6 +114,33 @@ const FundingDetail: React.FC<FundingDetailProps> = ({ product }) => {
           <span className="text-sm font-normal text-gray-900">원 달성</span>
         </div>
 
+        {/* 수량 선택 */}
+        <div className="flex items-center justify-between py-4 border-b border-gray-100">
+          <span className="font-bold text-gray-700">수량 선택</span>
+          <div className="flex items-center border border-gray-300 rounded">
+            <button
+              className="px-3 py-1 bg-gray-50 hover:bg-gray-100 text-gray-600 font-bold"
+              onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
+            >
+              -
+            </button>
+            <span className="px-4 font-bold text-gray-800">{quantity}</span>
+            <button
+              className="px-3 py-1 bg-gray-50 hover:bg-gray-100 text-gray-600 font-bold"
+              onClick={() => setQuantity((prev) => prev + 1)}
+            >
+              +
+            </button>
+          </div>
+        </div>
+
+        <div className="flex justify-between items-center py-2 text-lg font-bold">
+          <span>총 펀딩 금액</span>
+          <span className="text-[#00cfcf]">
+            {((product.price || 0) * quantity).toLocaleString()}원
+          </span>
+        </div>
+
         {/* 버튼 그룹 */}
         <div className="flex gap-3 mt-4">
           <button className="w-16 h-16 border border-gray-300 rounded-md hover:bg-gray-100 transition-colors flex flex-col items-center justify-center text-gray-400">
@@ -111,7 +151,10 @@ const FundingDetail: React.FC<FundingDetailProps> = ({ product }) => {
             <PiHandsClappingLight size={28} />
             <span className="text-sm font-medium">{45}</span>
           </button>
-          <button className="flex-1 bg-[#00cfcf] text-white rounded-md h-16 hover:bg-[#00afaf] transition-colors font-bold text-lg">
+          <button
+            className="flex-1 bg-[#00cfcf] text-white rounded-md h-16 hover:bg-[#00afaf] transition-colors font-bold text-lg"
+            onClick={handleFundingClick}
+          >
             펀딩하기
           </button>
         </div>
