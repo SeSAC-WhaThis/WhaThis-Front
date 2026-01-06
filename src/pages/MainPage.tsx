@@ -1,13 +1,16 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import MainBanner from "../components/common/MainBanner";
 import ProductList from "../components/products/ProductList";
 import { fetchProducts } from "../store/productSlice";
 import type { RootState } from "../store";
 import type { ThunkDispatch } from "@reduxjs/toolkit";
+import { PATH } from "../constants/path";
 
 const MainPage: React.FC = () => {
   const dispatch = useDispatch<ThunkDispatch<any, any, any>>();
+  const navigate = useNavigate();
   const { products, isLoading } = useSelector(
     (state: RootState) => state.products
   );
@@ -15,6 +18,13 @@ const MainPage: React.FC = () => {
   useEffect(() => {
     dispatch(fetchProducts());
   }, [dispatch]);
+
+  // 인기 상품 정렬 (좋아요 순)
+  const popularProducts = useMemo(() => {
+    return [...products]
+      .sort((a, b) => (b.likeCount || 0) - (a.likeCount || 0))
+      .slice(0, 5);
+  }, [products]);
 
   return (
     <div className="container mx-auto px-4 my-8 border-t border-gray-200 pt-8 flex flex-col md:flex-row gap-y-8">
@@ -28,7 +38,15 @@ const MainPage: React.FC = () => {
         {/* 상품 목록 */}
         <section>
           {isLoading ? (
-            <div className="text-center py-20">Loading...</div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <div key={index} className="animate-pulse">
+                  <div className="w-full h-48 bg-gray-200 rounded-lg mb-3" />
+                  <div className="h-5 bg-gray-200 rounded w-3/4 mb-2" />
+                  <div className="h-4 bg-gray-200 rounded w-1/2" />
+                </div>
+              ))}
+            </div>
           ) : (
             <ProductList products={products} />
           )}
@@ -36,12 +54,54 @@ const MainPage: React.FC = () => {
       </main>
 
       {/* 사이드 영역 (오른쪽 1/4) */}
-      <aside className="w-full md:w-1/4 bg-gray-50 p-2 rounded-xl h-fit md:ml-8">
-        <h3 className="text-xl font-bold mb-4">Sidebar</h3>
-        <div className="space-y-4 text-gray-600">
-          <div className="h-40 bg-gray-200 rounded flex items-center justify-center">
-            인기상품 출력 영역
-          </div>
+      <aside className="w-full md:w-1/4 bg-gray-50 p-4 rounded-xl h-fit md:ml-8">
+        <h3 className="text-xl font-bold mb-4">인기 프로젝트</h3>
+        <div className="flex flex-col gap-4">
+          {isLoading
+            ? // 스켈레톤 UI
+              Array.from({ length: 5 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="flex gap-3 items-start animate-pulse"
+                >
+                  <div className="w-20 h-14 bg-gray-200 rounded flex-shrink-0" />
+                  <div className="flex-1 space-y-2 py-1">
+                    <div className="h-3.5 bg-gray-200 rounded w-3/4" />
+                    <div className="h-3 bg-gray-200 rounded w-1/4" />
+                  </div>
+                </div>
+              ))
+            : popularProducts.map((product, index) => (
+                <div
+                  key={product.id}
+                  className="flex gap-3 cursor-pointer group items-start"
+                  onClick={() => navigate(PATH.PRODUCT.DETAIL(product.id))}
+                >
+                  {/* 썸네일 (좌측) */}
+                  <div className="w-20 h-14 flex-shrink-0 rounded overflow-hidden relative bg-gray-200">
+                    <img
+                      src={product.thumbnailImageUrl}
+                      alt={product.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute top-0 left-0 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded-br font-bold">
+                      {index + 1}
+                    </div>
+                  </div>
+
+                  {/* 타이틀 (우측) */}
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-sm font-medium text-gray-900 line-clamp-2 group-hover:text-[#00cfcf] transition-colors leading-tight">
+                      {product.title}
+                    </h4>
+                    <div className="flex items-center gap-1 mt-1 text-xs text-gray-500">
+                      <span className="text-red-400">
+                        ♥ {product.likeCount || 0}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
         </div>
       </aside>
     </div>

@@ -95,7 +95,13 @@ const FollowingFeedPage: React.FC = () => {
       try {
         const response = await axiosInstance.get("/follows/products");
         if (response.data.success) {
-          setProducts(response.data.data);
+          // 서버 데이터 매핑: likeCount와 isLiked가 없을 경우 기본값 설정
+          const feedData = response.data.data.map((item: any) => ({
+            ...item,
+            likeCount: item.likeCount || 0,
+            isLiked: item.isLiked || false,
+          }));
+          setProducts(feedData);
         }
       } catch (error) {
         console.error("피드 조회 실패:", error);
