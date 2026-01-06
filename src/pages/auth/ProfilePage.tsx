@@ -9,6 +9,7 @@ import FollowList from "../../components/profile/FollowList";
 
 const ProfilePage: React.FC = () => {
   const { user } = useSelector((state: RootState) => state.auth);
+  console.log("ProfilePage - Redux user state:", user);
   const [activeTab, setActiveTab] = useState<
     "project" | "funding" | "update" | "following" | "follower"
   >("project");
@@ -18,7 +19,7 @@ const ProfilePage: React.FC = () => {
   }
 
   // user 타입에 nickname이 없으면 name을 사용하도록 처리
-  const nickname = (user as any).nickname || user.name;
+  const nickname = (user as any)?.nickname || user?.name || "사용자";
   const profileImg = user.profileImageUrl || defaultavatar;
 
   return (
