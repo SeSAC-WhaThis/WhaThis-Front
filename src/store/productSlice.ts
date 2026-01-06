@@ -19,6 +19,7 @@ export interface Product {
   description?: string; // 상품 설명
   storyImageUrl?: string; // 스토리 이미지 URL
   likeCount?: number; // 좋아요 수
+  isLiked?: boolean; // 좋아요 여부
 }
 
 // 카테고리 타입

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Product } from "../../store/productSlice";
 import { CiHeart } from "react-icons/ci";
+import { FaHeart } from "react-icons/fa";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Badge } from "reactstrap";
 import "./FundungDetail.css";
@@ -17,7 +18,7 @@ const FundingDetail: React.FC<FundingDetailProps> = ({ product }) => {
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
   const [likeCount, setLikeCount] = useState(product.likeCount || 0);
-  const [isLiked, setIsLiked] = useState(false); // 초기 상태는 false로 가정 (API 데이터에 따라 수정 필요)
+  const [isLiked, setIsLiked] = useState(product.isLiked || false);
 
   // 달성률 계산
   const achievePercentage = Math.floor(
@@ -166,11 +167,11 @@ const FundingDetail: React.FC<FundingDetailProps> = ({ product }) => {
             onClick={handleLikeClick}
             className={`w-16 h-16 border border-gray-300 rounded-md hover:bg-gray-100 transition-colors flex flex-col items-center justify-center ${
               isLiked
-                ? "text-red-500 border-red-200 bg-red-50"
+                ? "text-red-500"
                 : "text-gray-400"
             }`}
           >
-            <CiHeart size={28} />
+            {isLiked ? <FaHeart size={28} /> : <CiHeart size={28} />}
             <span className="text-sm font-medium">{likeCount}</span>
           </button>
           <button
