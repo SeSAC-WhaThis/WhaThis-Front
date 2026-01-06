@@ -76,7 +76,7 @@ export const fetchLikedProducts = createAsyncThunk<Product[]>(
   "products/fetchLikedProducts",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get("/products/liked");
+      const response = await axiosInstance.get("/products/like");
       const data = response.data;
 
       if (Array.isArray(data)) return data;
@@ -226,11 +226,16 @@ const productSlice = createSlice({
       })
       .addCase(fetchLikedProducts.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.likedProducts = Array.isArray(action.payload) ? action.payload : [];
+        state.likedProducts = Array.isArray(action.payload)
+          ? action.payload
+          : [];
       })
       .addCase(fetchLikedProducts.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = (action.payload as string) || action.error.message || "좋아요한 상품을 불러오는데 실패했습니다.";
+        state.error =
+          (action.payload as string) ||
+          action.error.message ||
+          "좋아요한 상품을 불러오는데 실패했습니다.";
       })
       // 카테고리 조회
       .addCase(fetchCategories.fulfilled, (state, action) => {

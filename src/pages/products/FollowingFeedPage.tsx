@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import axiosInstance from "../../api/axiosInstance";
 import { PATH } from "../../constants/path";
 import defaultavatar from "../../assets/icons/defaultavatar.png";
 import { CiHeart } from "react-icons/ci";
 import { FaHeart } from "react-icons/fa";
+import { fetchLikedProducts } from "../../store/productSlice";
+import type { RootState } from "../../store";
+import type { ThunkDispatch } from "@reduxjs/toolkit";
 
 interface Seller {
   id: number;
@@ -84,10 +88,16 @@ const LikeParticles = () => (
 );
 
 const FollowingFeedPage: React.FC = () => {
+  const dispatch = useDispatch<ThunkDispatch<any, any, any>>();
+  const { likedProducts } = useSelector((state: RootState) => state.products);
   const [products, setProducts] = useState<FeedProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [animatingId, setAnimatingId] = useState<number | null>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    dispatch(fetchLikedProducts());
+  }, [dispatch]);
 
   useEffect(() => {
     const fetchFeed = async () => {
@@ -111,6 +121,22 @@ const FollowingFeedPage: React.FC = () => {
 
     fetchFeed();
   }, []);
+
+  // likedProducts와 피드 상품의 좋아요 상태 동기화
+  useEffect(() => {
+    if (products.length === 0) return;
+
+    setProducts((prev) => {
+      const next = prev.map((p) => {
+        const isLiked = likedProducts.some((lp) => lp.id === p.id);
+        if (p.isLiked !== isLiked) {
+          return { ...p, isLiked };
+        }
+        return p;
+      });
+      return next.some((p, i) => p !== prev[i]) ? next : prev;
+    });
+  }, [likedProducts, loading]);
 
   const handleLike = async (e: React.MouseEvent, productId: number) => {
     e.stopPropagation();
@@ -144,6 +170,7 @@ const FollowingFeedPage: React.FC = () => {
       } else {
         await axiosInstance.post(`/products/${productId}/like`);
       }
+      dispatch(fetchLikedProducts());
     } catch (error) {
       console.error("좋아요 처리 실패:", error);
       // 실패 시 원상복구
