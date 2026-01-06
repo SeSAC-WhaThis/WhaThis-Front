@@ -22,12 +22,24 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    // 백엔드에서 에러 메시지를 보냈을 경우 (message 필드 확인)
-    if (error.response && error.response.data && error.response.data.message) {
-      const { method } = error.config;
+    // 디버깅: 에러 응답 상세 확인
+    console.error("API 요청 에러:", error);
+    if (error.response) {
+      console.error("서버 응답 데이터:", error.response.data);
+    }
+
+    // 백엔드 에러 메시지 추출 (다양한 구조 대응)
+    const data = error.response?.data;
+    const message =
+      data?.message ||
+      (typeof data?.error === "string" ? data.error : data?.error?.message) ||
+      (typeof data === "string" ? data : null);
+
+    if (message) {
+      const method = error.config?.method?.toLowerCase();
       // POST, PUT, PATCH, DELETE 요청에 대해서만 팝업 표시
-      if (["post", "put", "patch", "delete"].includes(method)) {
-        alert(error.response.data.message);
+      if (method && ["post", "put", "patch", "delete"].includes(method)) {
+        alert(message);
       }
     }
     return Promise.reject(error);
