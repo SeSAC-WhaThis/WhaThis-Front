@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { RootState, AppDispatch } from "../../store";
-import { updateProfile } from "../../store/authSlice";
+import axiosInstance from "../../api/axiosInstance";
 import { PATH } from "../../constants/path";
 import defaultavatar from "../../assets/icons/defaultavatar.png";
 
@@ -104,7 +104,12 @@ const UpdateProfile = ({ onCancel, onSuccess }: UpdateProfileProps) => {
     }
 
     try {
-      await dispatch(updateProfile(submitData)).unwrap();
+      // 415 에러 해결: axiosInstance 직접 사용 및 Content-Type: undefined 설정
+      await axiosInstance.put("/users/profile", submitData, {
+        headers: {
+          "Content-Type": undefined,
+        },
+      });
       alert("프로필이 수정되었습니다.");
       if (onSuccess) {
         onSuccess();
