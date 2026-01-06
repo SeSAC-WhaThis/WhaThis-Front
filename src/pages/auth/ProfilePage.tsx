@@ -9,7 +9,6 @@ import FollowList from "../../components/profile/FollowList";
 
 const ProfilePage: React.FC = () => {
   const { user } = useSelector((state: RootState) => state.auth);
-  console.log("ProfilePage - Redux user state:", user);
   const [activeTab, setActiveTab] = useState<
     "project" | "funding" | "update" | "following" | "follower"
   >("project");

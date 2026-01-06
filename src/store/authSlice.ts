@@ -118,12 +118,19 @@ export const login = createAsyncThunk<
     const authorization = response.headers["authorization"];
     const token = authorization ? authorization.replace("Bearer ", "") : null;
 
-    // 바디 데이터 처리 (유저 정보)
-    const user = response.data.user || response.data;
-
     if (!token) {
       throw new Error("인증 토큰이 헤더에 없습니다.");
     }
+
+    // Case B 해결: 토큰을 이용해 내 정보(프로필)를 별도로 조회
+    const profileResponse = await axiosInstance.get("/users/profile", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    // 백엔드 응답 구조에 맞춰 데이터 추출 (예: response.data.data)
+    const user = profileResponse.data.data || profileResponse.data;
 
     return { user, token };
   } catch (error: any) {

@@ -16,7 +16,6 @@ export default function RootMenus() {
 
   // isAuthenticated 뿐 아니라 user도 가져오기
   const { token, user } = useSelector((state: RootState) => state.auth);
-  console.log("RootMenus - Redux user state:", user);
   const isLoggedIn = Boolean(token);
 
   const [keyword, setKeyword] = useState("");

@@ -50,7 +50,7 @@ const Login = () => {
     try {
       // @ts-ignore
       const result = await dispatch(login({ email, password })).unwrap();
-      console.log("로그인 성공! API 응답 데이터:", result);
+      console.log("로그인 성공!", result);
       alert(`로그인 성공! 환영합니다`);
       navigate(PATH.MAIN);
     } catch (err) {
