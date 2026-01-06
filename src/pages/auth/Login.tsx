@@ -55,7 +55,6 @@ const Login = () => {
       navigate(PATH.MAIN);
     } catch (err) {
       console.error("로그인 실패:", err);
-      alert("로그인 실패: " + err);
     }
   };
 

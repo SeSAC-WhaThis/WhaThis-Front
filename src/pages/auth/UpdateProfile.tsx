@@ -117,7 +117,7 @@ const UpdateProfile = ({ onCancel, onSuccess }: UpdateProfileProps) => {
         navigate(PATH.AUTH.PROFILE);
       }
     } catch (error) {
-      alert(`수정 실패: ${error}`);
+      console.error("프로필 수정 실패:", error);
     }
   };
 
