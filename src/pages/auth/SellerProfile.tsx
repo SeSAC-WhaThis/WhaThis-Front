@@ -175,7 +175,11 @@ const SellerProfile = () => {
                 {new Intl.NumberFormat("ko-KR", {
                   notation: "compact",
                   maximumFractionDigits: 1,
-                }).format(profile.salesTotalAmount)}
+                }).format(
+                  profile.products.length > 0
+                    ? profile.products.reduce((sum, p) => sum + p.currentAmount, 0) / profile.products.length
+                    : 0
+                )}
               </div>
               <div className="text-sm text-gray-500">누적 판매액</div>
             </div>
