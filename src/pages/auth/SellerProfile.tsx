@@ -177,7 +177,7 @@ const SellerProfile = () => {
                   maximumFractionDigits: 1,
                 }).format(
                   profile.products.length > 0
-                    ? profile.products.reduce((sum, p) => sum + p.currentAmount, 0) / profile.products.length
+                    ? profile.products.reduce((sum, p) => sum + p.currentAmount, 0)
                     : 0
                 )}
               </div>
