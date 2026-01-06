@@ -13,5 +13,6 @@ export const PATH = {
     CREATE: "/product/create",
     DETAIL: (productId: string | number) => `/product/${productId}`,
     ORDER: "/orders/new",
+    FEED: "/feed",
   },
 };

@@ -54,8 +54,8 @@ export default function RootMenus() {
             </li>
 
             <li className="flex items-center gap-4">
-              <NavLink to={PATH.PRODUCT.PREORDERPAGE} className={linkClass}>
-                프리오더
+              <NavLink to={PATH.PRODUCT.FEED} className={linkClass}>
+                피드
               </NavLink>
 
               {/* ✅ 프리오더 옆 검색창 (라운드) */}
