@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import ProductList from "../../components/products/ProductList";
 import { fetchMyProducts } from "../../store/productSlice";
+import LikeProduct from "../../components/profile/LikeProduct";
 import type { RootState } from "../../store";
 import type { ThunkDispatch } from "@reduxjs/toolkit";
 import { PATH } from "../../constants/path";
@@ -15,7 +16,9 @@ const ProfilePage: React.FC = () => {
   const { myProducts, isLoading } = useSelector(
     (state: RootState) => state.products
   );
-  const [activeTab, setActiveTab] = useState<"project" | "funding">("project");
+  const [activeTab, setActiveTab] = useState<"project" | "funding" | "liked">(
+    "project"
+  );
 
   useEffect(() => {
     if (activeTab === "project") {
@@ -70,6 +73,16 @@ const ProfilePage: React.FC = () => {
           >
             내 펀딩
           </button>
+          <button
+            className={`p-4 text-left transition-colors ${
+              activeTab === "liked"
+                ? "bg-gray-100 font-bold text-[#00cfcf]"
+                : "hover:bg-gray-50 text-gray-700"
+            }`}
+            onClick={() => setActiveTab("liked")}
+          >
+            좋아요 누른 상품
+          </button>
         </div>
       </div>
 
@@ -103,6 +116,7 @@ const ProfilePage: React.FC = () => {
             </div>
           </div>
         )}
+        {activeTab === "liked" && <LikeProduct />}
       </div>
     </div>
   );

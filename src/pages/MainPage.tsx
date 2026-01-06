@@ -32,7 +32,17 @@ const MainPage: React.FC = () => {
       <main className="w-full md:flex-1 flex flex-col gap-10 md:border-r border-gray-200 md:pr-8">
         {/* 메인 배너 */}
         <section>
-          <MainBanner products={products} />
+          {isLoading ? (
+            <div className="w-full h-[400px] bg-gray-100 animate-pulse rounded-xl flex items-center">
+              <div className="px-8 md:px-12 w-full">
+                <div className="h-10 md:h-14 bg-gray-200 rounded-md w-3/4 mb-4" />
+                <div className="h-5 md:h-6 bg-gray-200 rounded-md w-1/2 mb-8" />
+                <div className="h-12 w-40 bg-gray-200 rounded-md" />
+              </div>
+            </div>
+          ) : (
+            <MainBanner products={products} />
+          )}
         </section>
 
         {/* 상품 목록 */}
@@ -54,7 +64,7 @@ const MainPage: React.FC = () => {
       </main>
 
       {/* 사이드 영역 (오른쪽 1/4) */}
-      <aside className="w-full md:w-1/4 bg-gray-50 p-4 rounded-xl h-fit md:ml-8">
+      <aside className="w-full md:w-1/4 bg-white p-4 rounded-xl h-fit md:ml-8 border border-gray-100">
         <h3 className="text-xl font-bold mb-4">인기 프로젝트</h3>
         <div className="flex flex-col gap-4">
           {isLoading
@@ -94,7 +104,13 @@ const MainPage: React.FC = () => {
                     <h4 className="text-sm font-medium text-gray-900 line-clamp-2 group-hover:text-[#00cfcf] transition-colors leading-tight">
                       {product.title}
                     </h4>
-                    <div className="flex items-center gap-1 mt-1 text-xs text-gray-500">
+                    <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
+                      <span className="text-[#00cfcf] font-bold">
+                        {Math.floor(
+                          (product.currentAmount / product.goalAmount) * 100
+                        )}
+                        % 달성
+                      </span>
                       <span className="text-red-400">
                         ♥ {product.likeCount || 0}
                       </span>

@@ -71,6 +71,25 @@ export const fetchMyProducts = createAsyncThunk<Product[]>(
   }
 );
 
+// 좋아요한 상품 조회 액션
+export const fetchLikedProducts = createAsyncThunk<Product[]>(
+  "products/fetchLikedProducts",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get("/products/liked");
+      const data = response.data;
+
+      if (Array.isArray(data)) return data;
+      if (data && Array.isArray(data.data)) return data.data;
+      if (data && Array.isArray(data.result)) return data.result;
+      return [];
+    } catch (error: any) {
+      console.error("좋아요 상품 조회 에러 상세:", error);
+      return rejectWithValue(error.response?.data || "좋아요 상품 조회 실패");
+    }
+  }
+);
+
 // 카테고리 목록 조회 액션
 export const fetchCategories = createAsyncThunk<Category[]>(
   "products/fetchCategories",
@@ -119,17 +138,24 @@ export const fetchProducts = createAsyncThunk<Product[]>(
     const response = await axiosInstance.get("/products");
 
     const data = response.data;
+    let products: any[] = [];
 
-    if (Array.isArray(data)) return data;
-    if (data && Array.isArray(data.data)) return data.data;
-    if (data && Array.isArray(data.result)) return data.result;
-    return [];
+    if (Array.isArray(data)) products = data;
+    else if (data && Array.isArray(data.data)) products = data.data;
+    else if (data && Array.isArray(data.result)) products = data.result;
+
+    return products.map((product) => ({
+      ...product,
+      likeCount: product.likeCount || 0,
+      isLiked: product.isLiked || false,
+    }));
   }
 );
 
 interface ProductState {
   products: Product[];
   myProducts: Product[];
+  likedProducts: Product[];
   categories: Category[];
   selectedProduct: Product | null;
   isLoading: boolean;
@@ -139,6 +165,7 @@ interface ProductState {
 const initialState: ProductState = {
   products: [],
   myProducts: [],
+  likedProducts: [],
   categories: [],
   selectedProduct: null,
   isLoading: false,
@@ -191,6 +218,19 @@ const productSlice = createSlice({
         state.isLoading = false;
         state.error =
           action.error.message || "내 상품을 불러오는데 실패했습니다.";
+      })
+      // 좋아요 상품 조회
+      .addCase(fetchLikedProducts.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchLikedProducts.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.likedProducts = Array.isArray(action.payload) ? action.payload : [];
+      })
+      .addCase(fetchLikedProducts.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = (action.payload as string) || action.error.message || "좋아요한 상품을 불러오는데 실패했습니다.";
       })
       // 카테고리 조회
       .addCase(fetchCategories.fulfilled, (state, action) => {

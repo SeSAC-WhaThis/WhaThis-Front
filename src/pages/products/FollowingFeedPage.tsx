@@ -5,7 +5,6 @@ import { PATH } from "../../constants/path";
 import defaultavatar from "../../assets/icons/defaultavatar.png";
 import { CiHeart } from "react-icons/ci";
 import { FaHeart } from "react-icons/fa";
-import { PiHandsClappingLight } from "react-icons/pi";
 
 interface Seller {
   id: number;
@@ -259,9 +258,6 @@ const FollowingFeedPage: React.FC = () => {
                   {animatingId === product.id && <LikeParticles />}
                   {product.isLiked ? <FaHeart size={28} /> : <CiHeart size={28} />}
                   <span className="text-sm font-medium">{product.likeCount || 0}</span>
-                </button>
-                <button className="text-gray-800 hover:text-blue-500 transition-colors">
-                  <PiHandsClappingLight size={28} />
                 </button>
               </div>
 
