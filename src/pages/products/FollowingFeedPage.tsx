@@ -4,6 +4,7 @@ import axiosInstance from "../../api/axiosInstance";
 import { PATH } from "../../constants/path";
 import defaultavatar from "../../assets/icons/defaultavatar.png";
 import { CiHeart } from "react-icons/ci";
+import { FaHeart } from "react-icons/fa";
 import { PiHandsClappingLight } from "react-icons/pi";
 
 interface Seller {
@@ -39,11 +40,54 @@ interface FeedProduct {
   category: Category;
   daysLeft: number;
   createdAt: string;
+  likeCount?: number;
+  isLiked?: boolean;
 }
+
+// 좋아요 파티클 컴포넌트
+const LikeParticles = () => (
+  <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-0 h-0 pointer-events-none">
+    <style>
+      {`
+        @keyframes particle-explosion {
+          0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+          100% { transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(0); opacity: 0; }
+        }
+        .particle {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          animation: particle-explosion 0.6s ease-out forwards;
+        }
+      `}
+    </style>
+    {[...Array(8)].map((_, i) => {
+      const angle = (i * 45 * Math.PI) / 180;
+      const distance = 30;
+      const tx = Math.cos(angle) * distance;
+      const ty = Math.sin(angle) * distance;
+      return (
+        <span
+          key={i}
+          className="particle"
+          style={{
+            "--tx": `${tx}px`,
+            "--ty": `${ty}px`,
+            backgroundColor: i % 2 === 0 ? "#ef4444" : "#fca5a5",
+          } as React.CSSProperties}
+        />
+      );
+    })}
+  </span>
+);
 
 const FollowingFeedPage: React.FC = () => {
   const [products, setProducts] = useState<FeedProduct[]>([]);
   const [loading, setLoading] = useState(true);
+  const [animatingId, setAnimatingId] = useState<number | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -62,6 +106,55 @@ const FollowingFeedPage: React.FC = () => {
 
     fetchFeed();
   }, []);
+
+  const handleLike = async (e: React.MouseEvent, productId: number) => {
+    e.stopPropagation();
+    const product = products.find((p) => p.id === productId);
+    if (!product) return;
+
+    const wasLiked = product.isLiked;
+
+    // 낙관적 업데이트: UI 먼저 변경
+    setProducts((prev) =>
+      prev.map((p) =>
+        p.id === productId
+          ? {
+              ...p,
+              isLiked: !wasLiked,
+              likeCount: (p.likeCount || 0) + (wasLiked ? -1 : 1),
+            }
+          : p
+      )
+    );
+
+    // 좋아요 누를 때만 애니메이션 실행
+    if (!wasLiked) {
+      setAnimatingId(productId);
+      setTimeout(() => setAnimatingId(null), 600);
+    }
+
+    try {
+      if (wasLiked) {
+        await axiosInstance.delete(`/products/${productId}/like`);
+      } else {
+        await axiosInstance.post(`/products/${productId}/like`);
+      }
+    } catch (error) {
+      console.error("좋아요 처리 실패:", error);
+      // 실패 시 원상복구
+      setProducts((prev) =>
+        prev.map((p) =>
+          p.id === productId
+            ? {
+                ...p,
+                isLiked: wasLiked,
+                likeCount: (p.likeCount || 0) + (wasLiked ? 1 : -1),
+              }
+            : p
+        )
+      );
+    }
+  };
 
   if (loading) return <div className="text-center py-20">Loading...</div>;
 
@@ -151,8 +244,15 @@ const FollowingFeedPage: React.FC = () => {
 
               {/* Action Buttons */}
               <div className="p-3 pb-0 flex gap-4">
-                <button className="text-gray-800 hover:text-red-500 transition-colors">
-                  <CiHeart size={28} />
+                <button
+                  className={`flex items-center gap-1 transition-transform duration-300 relative ${
+                    product.isLiked ? "text-red-500" : "text-gray-800 hover:text-red-500"
+                  } ${animatingId === product.id ? "scale-125" : "scale-100"}`}
+                  onClick={(e) => handleLike(e, product.id)}
+                >
+                  {animatingId === product.id && <LikeParticles />}
+                  {product.isLiked ? <FaHeart size={28} /> : <CiHeart size={28} />}
+                  <span className="text-sm font-medium">{product.likeCount || 0}</span>
                 </button>
                 <button className="text-gray-800 hover:text-blue-500 transition-colors">
                   <PiHandsClappingLight size={28} />

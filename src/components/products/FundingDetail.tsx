@@ -14,11 +14,52 @@ interface FundingDetailProps {
   product: Product;
 }
 
+// 좋아요 파티클 컴포넌트
+const LikeParticles = () => (
+  <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-0 h-0 pointer-events-none">
+    <style>
+      {`
+        @keyframes particle-explosion {
+          0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+          100% { transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(0); opacity: 0; }
+        }
+        .particle {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          animation: particle-explosion 0.6s ease-out forwards;
+        }
+      `}
+    </style>
+    {[...Array(8)].map((_, i) => {
+      const angle = (i * 45 * Math.PI) / 180;
+      const distance = 30;
+      const tx = Math.cos(angle) * distance;
+      const ty = Math.sin(angle) * distance;
+      return (
+        <span
+          key={i}
+          className="particle"
+          style={{
+            "--tx": `${tx}px`,
+            "--ty": `${ty}px`,
+            backgroundColor: i % 2 === 0 ? "#ef4444" : "#fca5a5",
+          } as React.CSSProperties}
+        />
+      );
+    })}
+  </span>
+);
+
 const FundingDetail: React.FC<FundingDetailProps> = ({ product }) => {
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
   const [likeCount, setLikeCount] = useState(product.likeCount || 0);
   const [isLiked, setIsLiked] = useState(product.isLiked || false);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   // 달성률 계산
   const achievePercentage = Math.floor(
@@ -53,9 +94,11 @@ const FundingDetail: React.FC<FundingDetailProps> = ({ product }) => {
         setLikeCount((prev) => Math.max(0, prev - 1));
         setIsLiked(false);
       } else {
+        setIsAnimating(true);
         await axiosInstance.post(`/products/${product.id}/like`);
         setLikeCount((prev) => prev + 1);
         setIsLiked(true);
+        setTimeout(() => setIsAnimating(false), 600);
       }
     } catch (error) {
       console.error("좋아요 요청 실패:", error);
@@ -165,12 +208,13 @@ const FundingDetail: React.FC<FundingDetailProps> = ({ product }) => {
         <div className="flex gap-3 mt-4">
           <button
             onClick={handleLikeClick}
-            className={`w-16 h-16 border border-gray-300 rounded-md hover:bg-gray-100 transition-colors flex flex-col items-center justify-center ${
+            className={`w-16 h-16 border border-gray-300 rounded-md hover:bg-gray-100 transition-all duration-300 flex flex-col items-center justify-center relative ${
               isLiked
                 ? "text-red-500"
                 : "text-gray-400"
-            }`}
+            } ${isAnimating ? "scale-125" : "scale-100"}`}
           >
+            {isAnimating && <LikeParticles />}
             {isLiked ? <FaHeart size={28} /> : <CiHeart size={28} />}
             <span className="text-sm font-medium">{likeCount}</span>
           </button>
