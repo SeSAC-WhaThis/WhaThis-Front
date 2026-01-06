@@ -117,6 +117,31 @@ const FollowingFeedPage: React.FC = () => {
                 className="relative aspect-square cursor-pointer bg-gray-100"
                 onClick={() => navigate(PATH.PRODUCT.DETAIL(product.id))}
               >
+                {(() => {
+                  const now = new Date();
+                  const startDate = new Date(product.startDate);
+                  const endDate = new Date(product.endDate);
+
+                  if (now < startDate) {
+                    return (
+                      <div className="absolute top-3 right-3 z-10 bg-yellow-500 text-white text-xs px-2 py-1 rounded font-bold">
+                        준비중
+                      </div>
+                    );
+                  } else if (now > endDate) {
+                    return (
+                      <div className="absolute top-3 right-3 z-10 bg-gray-500 text-white text-xs px-2 py-1 rounded font-bold">
+                        종료
+                      </div>
+                    );
+                  } else {
+                    return (
+                      <div className="absolute top-3 right-3 z-10 bg-[#00cfcf] text-white text-xs px-2 py-1 rounded font-bold">
+                        진행중
+                      </div>
+                    );
+                  }
+                })()}
                 <img
                   src={product.thumbnailImageUrl}
                   alt={product.title}

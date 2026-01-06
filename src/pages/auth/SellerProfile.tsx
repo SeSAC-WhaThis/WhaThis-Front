@@ -228,6 +228,31 @@ const SellerProfile = () => {
                   <div className="absolute top-3 left-3 bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">
                     {product.category.name}
                   </div>
+                  {(() => {
+                    const now = new Date();
+                    const startDate = new Date(product.startDate);
+                    const endDate = new Date(product.endDate);
+
+                    if (now < startDate) {
+                      return (
+                        <div className="absolute top-3 right-3 bg-yellow-500 text-white text-xs px-2 py-1 rounded font-bold">
+                          준비중
+                        </div>
+                      );
+                    } else if (now > endDate) {
+                      return (
+                        <div className="absolute top-3 right-3 bg-gray-500 text-white text-xs px-2 py-1 rounded font-bold">
+                          종료
+                        </div>
+                      );
+                    } else {
+                      return (
+                        <div className="absolute top-3 right-3 bg-[#00cfcf] text-white text-xs px-2 py-1 rounded font-bold">
+                          진행중
+                        </div>
+                      );
+                    }
+                  })()}
                 </div>
 
                 <div className="p-3">

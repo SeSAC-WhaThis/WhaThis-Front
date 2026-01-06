@@ -15,6 +15,10 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
     return null;
   }
 
+  const now = new Date();
+  const startDate = new Date(product.startDate);
+  const endDate = new Date(product.endDate);
+
   const achievePercentage = Math.floor(
     (product.currentAmount / product.goalAmount) * 100
   );
@@ -30,11 +34,33 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
     navigate(PATH.PRODUCT.DETAIL(product.id));
   };
 
+  let statusBadge = null;
+  if (now < startDate) {
+    statusBadge = (
+      <div className="absolute top-2 right-2 bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded z-10">
+        준비중
+      </div>
+    );
+  } else if (now > endDate) {
+    statusBadge = (
+      <div className="absolute top-2 right-2 bg-gray-500 text-white text-xs font-bold px-2 py-1 rounded z-10">
+        종료
+      </div>
+    );
+  } else {
+    statusBadge = (
+      <div className="absolute top-2 right-2 bg-[#00cfcf] text-white text-xs font-bold px-2 py-1 rounded z-10">
+        진행중
+      </div>
+    );
+  }
+
   return (
     <div
       onClick={handleItemClick}
-      className="border rounded-lg border-white overflow-hidden shadow-lg hover:scale-105 transition-transform cursor-pointer"
+      className="relative border rounded-lg border-white overflow-hidden shadow-lg hover:scale-105 transition-transform cursor-pointer"
     >
+      {statusBadge}
       <img
         src={product.thumbnailImageUrl}
         alt={product.title}
