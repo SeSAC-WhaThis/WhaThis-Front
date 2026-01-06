@@ -2,12 +2,12 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Product } from "../../store/productSlice";
 import { CiHeart } from "react-icons/ci";
-import { PiHandsClappingLight } from "react-icons/pi";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Badge } from "reactstrap";
 import "./FundungDetail.css";
 import defaultavatar from "../../assets/icons/defaultavatar.png";
 import { PATH } from "../../constants/path";
+import axiosInstance from "../../api/axiosInstance";
 
 interface FundingDetailProps {
   product: Product;
@@ -16,6 +16,9 @@ interface FundingDetailProps {
 const FundingDetail: React.FC<FundingDetailProps> = ({ product }) => {
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
+  const [likeCount, setLikeCount] = useState(product.likeCount || 0);
+  const [isLiked, setIsLiked] = useState(false); // 초기 상태는 false로 가정 (API 데이터에 따라 수정 필요)
+
   // 달성률 계산
   const achievePercentage = Math.floor(
     ((product.currentAmount || 0) / (product.goalAmount || 1)) * 100
@@ -40,6 +43,22 @@ const FundingDetail: React.FC<FundingDetailProps> = ({ product }) => {
         thumbnailImageUrl: product.thumbnailImageUrl,
       },
     });
+  };
+
+  const handleLikeClick = async () => {
+    try {
+      if (isLiked) {
+        await axiosInstance.delete(`/products/${product.id}/like`);
+        setLikeCount((prev) => Math.max(0, prev - 1));
+        setIsLiked(false);
+      } else {
+        await axiosInstance.post(`/products/${product.id}/like`);
+        setLikeCount((prev) => prev + 1);
+        setIsLiked(true);
+      }
+    } catch (error) {
+      console.error("좋아요 요청 실패:", error);
+    }
   };
 
   // 판매자 정보 처리
@@ -143,13 +162,16 @@ const FundingDetail: React.FC<FundingDetailProps> = ({ product }) => {
 
         {/* 버튼 그룹 */}
         <div className="flex gap-3 mt-4">
-          <button className="w-16 h-16 border border-gray-300 rounded-md hover:bg-gray-100 transition-colors flex flex-col items-center justify-center text-gray-400">
+          <button
+            onClick={handleLikeClick}
+            className={`w-16 h-16 border border-gray-300 rounded-md hover:bg-gray-100 transition-colors flex flex-col items-center justify-center ${
+              isLiked
+                ? "text-red-500 border-red-200 bg-red-50"
+                : "text-gray-400"
+            }`}
+          >
             <CiHeart size={28} />
-            <span className="text-sm font-medium">{123}</span>
-          </button>
-          <button className="w-16 h-16 border border-gray-300 rounded-md hover:bg-gray-100 transition-colors flex flex-col items-center justify-center text-gray-400">
-            <PiHandsClappingLight size={28} />
-            <span className="text-sm font-medium">{45}</span>
+            <span className="text-sm font-medium">{likeCount}</span>
           </button>
           <button
             className="flex-1 bg-[#00cfcf] text-white rounded-md h-16 hover:bg-[#00afaf] transition-colors font-bold text-lg"
