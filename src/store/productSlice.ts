@@ -146,8 +146,8 @@ export const fetchProducts = createAsyncThunk<Product[]>(
 
     return products.map((product) => ({
       ...product,
-      likeCount: product.likeCount || 0,
-      isLiked: product.isLiked || false,
+      likeCount: product.likeCount ?? product.like_count ?? 0,
+      isLiked: product.isLiked ?? product.is_liked ?? false,
     }));
   }
 );
