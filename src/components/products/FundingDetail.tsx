@@ -13,6 +13,7 @@ import ProductTabs, { TabType } from "./ProductTabs";
 import StoryContent from "./StoryContent";
 import ReviewList from "./ReviewList";
 import ReviewWriteModal from "./ReviewWriteModal";
+import { IoMdInformationCircle } from "react-icons/io";
 
 interface FundingDetailProps {
   product: Product;
@@ -47,11 +48,13 @@ const LikeParticles = () => (
         <span
           key={i}
           className="particle"
-          style={{
-            "--tx": `${tx}px`,
-            "--ty": `${ty}px`,
-            backgroundColor: i % 2 === 0 ? "#ef4444" : "#fca5a5",
-          } as React.CSSProperties}
+          style={
+            {
+              "--tx": `${tx}px`,
+              "--ty": `${ty}px`,
+              backgroundColor: i % 2 === 0 ? "#ef4444" : "#fca5a5",
+            } as React.CSSProperties
+          }
         />
       );
     })}
@@ -77,7 +80,7 @@ const FundingDetail: React.FC<FundingDetailProps> = ({ product }) => {
   const daysLeft = Math.max(
     Math.ceil(
       (new Date(product.endDate || Date.now()).getTime() - Date.now()) /
-      (1000 * 60 * 60 * 24)
+        (1000 * 60 * 60 * 24)
     ),
     0
   );
@@ -145,6 +148,21 @@ const FundingDetail: React.FC<FundingDetailProps> = ({ product }) => {
                   className="w-full h-auto object-cover aspect-video rounded-lg"
                 />
               </div>
+              <h2 className="mb-3 pb-3 border-b border-gray-200">
+                프로젝트 스토리
+              </h2>
+              <p></p>
+              <div className="rounded-lg bg-gray-100 p-3">
+                <div className="flex items-center gap-1 mb-1 text-sm font-bold text-gray-800">
+                  <IoMdInformationCircle size={14} />
+                  <span>구매 전 반드시 확인하세요!</span>
+                </div>
+                <div className="text-sm text-gray-600 leading-relaxed pl-1">
+                  • 아래 스토리 내용은 이전 펀딩 진행 시 작성된 내용입니다.
+                  <br />• 상품 금액은 스토리 상이 아닌 구매하기 버튼을 클릭해서
+                  상품 선택 후 확인해 주세요.
+                </div>
+              </div>
               <StoryContent storyImageUrl={product.storyImageUrl} />
             </>
           )}
@@ -170,7 +188,8 @@ const FundingDetail: React.FC<FundingDetailProps> = ({ product }) => {
             {/* 카테고리 & 타입 */}
             <div className="text-sm font-medium text-gray-500 border-b border-gray-100 pb-4">
               <span className="">
-                {typeof product.category === "object" && product.category !== null
+                {typeof product.category === "object" &&
+                product.category !== null
                   ? (product.category as any).name
                   : product.category}
                 {">"}
@@ -234,10 +253,9 @@ const FundingDetail: React.FC<FundingDetailProps> = ({ product }) => {
             <div className="flex gap-3 mt-4">
               <button
                 onClick={handleLikeClick}
-                className={`w-16 h-16 border border-gray-300 rounded-md hover:bg-gray-100 transition-all duration-300 flex flex-col items-center justify-center relative ${isLiked
-                  ? "text-red-500"
-                  : "text-gray-400"
-                  } ${isAnimating ? "scale-125" : "scale-100"}`}
+                className={`w-16 h-16 border border-gray-300 rounded-md hover:bg-gray-100 transition-all duration-300 flex flex-col items-center justify-center relative ${
+                  isLiked ? "text-red-500" : "text-gray-400"
+                } ${isAnimating ? "scale-125" : "scale-100"}`}
               >
                 {isAnimating && <LikeParticles />}
                 {isLiked ? <FaHeart size={28} /> : <CiHeart size={28} />}
