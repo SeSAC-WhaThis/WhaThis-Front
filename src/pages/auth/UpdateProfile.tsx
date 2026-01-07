@@ -93,23 +93,16 @@ const UpdateProfile = ({ onCancel, onSuccess }: UpdateProfileProps) => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    const submitData = new FormData();
-    submitData.append("name", formData.name);
-    submitData.append("nickname", formData.nickname);
-    submitData.append("phoneNumber", formData.phoneNumber);
-    submitData.append("address", formData.address);
-
-    if (profileImage) {
-      submitData.append("profileImage", profileImage);
-    }
+    const submitData = {
+      name: formData.name,
+      nickname: formData.nickname,
+      phoneNumber: formData.phoneNumber,
+      address: formData.address,
+      profileImageUrl: user?.profileImageUrl,
+    };
 
     try {
-      // 415 에러 해결: axiosInstance 직접 사용 및 Content-Type: undefined 설정
-      await axiosInstance.put("/users/profile", submitData, {
-        headers: {
-          "Content-Type": undefined,
-        },
-      });
+      await axiosInstance.patch("/users/profile", submitData);
       alert("프로필이 수정되었습니다.");
       if (onSuccess) {
         onSuccess();

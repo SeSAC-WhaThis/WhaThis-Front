@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import axiosInstance from "../../api/axiosInstance";
 import { PATH } from "../../constants/path";
 import defaultavatar from "../../assets/icons/defaultavatar.png";
 import { CiHeart } from "react-icons/ci";
 import { FaHeart } from "react-icons/fa";
+import type { RootState } from "../../store";
+import type { ThunkDispatch } from "@reduxjs/toolkit";
 
 interface Seller {
   id: number;
@@ -72,11 +75,13 @@ const LikeParticles = () => (
         <span
           key={i}
           className="particle"
-          style={{
-            "--tx": `${tx}px`,
-            "--ty": `${ty}px`,
-            backgroundColor: i % 2 === 0 ? "#ef4444" : "#fca5a5",
-          } as React.CSSProperties}
+          style={
+            {
+              "--tx": `${tx}px`,
+              "--ty": `${ty}px`,
+              backgroundColor: i % 2 === 0 ? "#ef4444" : "#fca5a5",
+            } as React.CSSProperties
+          }
         />
       );
     })}
@@ -84,6 +89,7 @@ const LikeParticles = () => (
 );
 
 const FollowingFeedPage: React.FC = () => {
+  const dispatch = useDispatch<ThunkDispatch<any, any, any>>();
   const [products, setProducts] = useState<FeedProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [animatingId, setAnimatingId] = useState<number | null>(null);
@@ -95,10 +101,13 @@ const FollowingFeedPage: React.FC = () => {
         const response = await axiosInstance.get("/follows/products");
         if (response.data.success) {
           // 서버 데이터 매핑: likeCount와 isLiked가 없을 경우 기본값 설정
-          const feedData = response.data.data.map((item: any) => ({
+          const list = Array.isArray(response.data.data)
+            ? response.data.data
+            : [];
+          const feedData = list.map((item: any) => ({
             ...item,
-            likeCount: item.likeCount || 0,
-            isLiked: item.isLiked || false,
+            likeCount: item.likeCount ?? item.like_count ?? 0,
+            isLiked: item.isLiked ?? item.is_liked ?? false,
           }));
           setProducts(feedData);
         }
@@ -144,8 +153,22 @@ const FollowingFeedPage: React.FC = () => {
       } else {
         await axiosInstance.post(`/products/${productId}/like`);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("좋아요 처리 실패:", error);
+
+      const status = error.response?.status;
+
+      // 409 Conflict: 이미 좋아요가 되어있는 상태 (POST 요청 시)
+      // UI는 이미 좋아요 상태로 변경되었으므로 롤백하지 않음
+      if (!wasLiked && status === 409) {
+        return;
+      }
+
+      // 404 Not Found: 이미 좋아요가 취소된 상태 (DELETE 요청 시)
+      if (wasLiked && status === 404) {
+        return;
+      }
+
       // 실패 시 원상복구
       setProducts((prev) =>
         prev.map((p) =>
@@ -251,13 +274,21 @@ const FollowingFeedPage: React.FC = () => {
               <div className="p-3 pb-0 flex gap-4">
                 <button
                   className={`flex items-center gap-1 transition-transform duration-300 relative ${
-                    product.isLiked ? "text-red-500" : "text-gray-800 hover:text-red-500"
+                    product.isLiked
+                      ? "text-red-500"
+                      : "text-gray-800 hover:text-red-500"
                   } ${animatingId === product.id ? "scale-125" : "scale-100"}`}
                   onClick={(e) => handleLike(e, product.id)}
                 >
                   {animatingId === product.id && <LikeParticles />}
-                  {product.isLiked ? <FaHeart size={28} /> : <CiHeart size={28} />}
-                  <span className="text-sm font-medium">{product.likeCount || 0}</span>
+                  {product.isLiked ? (
+                    <FaHeart size={28} />
+                  ) : (
+                    <CiHeart size={28} />
+                  )}
+                  <span className="text-sm font-medium">
+                    {product.likeCount || 0}
+                  </span>
                 </button>
               </div>
 
