@@ -64,12 +64,12 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
       <img
         src={product.thumbnailImageUrl}
         alt={product.title}
-        className="w-full h-48 object-cover"
+        className="w-full h-46 object-cover"
       />
 
-      <div className="p-4">
+      <div className="pt-3 pl-2 pr-2">
         <div className="flex justify-between items-center mb-2">
-          <span className="text-blue-600 font-bold text-lg">
+          <span className="text-[#00cfcf] font-bold text-lg">
             {achievePercentage}% 달성
           </span>
           <span className="text-gray-500 text-sm font-medium">
@@ -77,7 +77,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
           </span>
         </div>
 
-        <h3 className="text-lg font-bold truncate mb-1">{product.title}</h3>
+        <h5 className="text-lg font-bold truncate mb-1">{product.title}</h5>
         <p className="text-gray-500 text-sm">
           {product.seller?.nickname || product.seller?.name || "판매자"}
         </p>

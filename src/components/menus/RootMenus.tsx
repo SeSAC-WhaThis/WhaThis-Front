@@ -41,7 +41,8 @@ export default function RootMenus() {
   const profileImgSrc = user?.profileImageUrl || "/default-avatar.png";
 
   const linkClass = ({ isActive }: { isActive: boolean }) =>
-    `text-[18px] font-medium transition-colors ${isActive ? "text-[rgb(231,249,249)] active" : "text-black"
+    `text-[18px] font-medium transition-colors ${
+      isActive ? "text-[rgb(231,249,249)] active" : "text-black"
     }`;
 
   return (
@@ -52,7 +53,15 @@ export default function RootMenus() {
           {/* 메뉴 */}
           <ul className="flex items-center gap-8">
             <li>
-              <NavLink to={PATH.MAIN} className={linkClass} end>
+              <NavLink
+                to={PATH.MAIN}
+                className={({ isActive }) =>
+                  `text-[26px] font-bold transition-colors ${
+                    isActive ? "text-[rgb(231,249,249)] active" : "text-black"
+                  }`
+                }
+                end
+              >
                 whathis
               </NavLink>
             </li>

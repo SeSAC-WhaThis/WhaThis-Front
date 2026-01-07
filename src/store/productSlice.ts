@@ -132,10 +132,12 @@ export const createProduct = createAsyncThunk<Product, FormData>(
 );
 
 // 비동기 액션 생성 (API 호출)
-export const fetchProducts = createAsyncThunk<Product[]>(
+export const fetchProducts = createAsyncThunk<Product[], number | undefined>(
   "products/fetchProducts",
-  async () => {
-    const response = await axiosInstance.get("/products");
+  async (categoryId) => {
+    const response = await axiosInstance.get("/products", {
+      params: categoryId ? { categoryId } : {},
+    });
 
     const data = response.data;
     let products: any[] = [];

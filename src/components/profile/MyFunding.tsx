@@ -6,7 +6,6 @@ interface Order {
   merchantUid: string;
   productName: string;
   productImageUrl: string;
-  impUid?: string; // 포트원 결제 고유 ID (백엔드 DTO에 추가 필요)
   orderDate: string;
   endDate: string;
   quantity: number;
@@ -73,21 +72,15 @@ const MyFunding = () => {
       return;
     }
 
-    // 502 에러 해결: 포트원 API는 취소 시 merchant_uid가 아닌 imp_uid를 요구할 수 있습니다.
-    // 백엔드에서 impUid를 반환하도록 수정하고, 프론트에서는 이를 우선적으로 사용합니다.
-    const paymentId = selectedOrder.impUid || selectedOrder.merchantUid;
-
     // 요청 데이터 확인용 로그 (Body에 들어갈 내용)
     console.log("결제 취소 요청 Body:", {
       paymentId: selectedOrder.merchantUid,
-      paymentId: paymentId,
       cancelReason: reasonToSend,
     });
 
     try {
       const response = await axiosInstance.post("/orders/cancel", {
         paymentId: selectedOrder.merchantUid,
-        paymentId: paymentId,
         cancelReason: reasonToSend,
       });
 
