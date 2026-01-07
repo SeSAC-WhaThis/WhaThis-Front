@@ -1,9 +1,10 @@
 import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import ProductList from "../../components/products/ProductList";
-import { fetchProducts } from "../../store/productSlice";
+import { fetchProducts, searchProductsAi } from "../../store/productSlice";
 import type { RootState } from "../../store"; // store/index.ts에서 RootState 타입이 export 되어 있다고 가정
 import type { ThunkDispatch } from "@reduxjs/toolkit"; // dispatch 타입 지정을 위해
+import { useSearchParams } from "react-router-dom";
 
 const FundingPage: React.FC = () => {
   const dispatch = useDispatch<ThunkDispatch<any, any, any>>();
@@ -11,10 +12,17 @@ const FundingPage: React.FC = () => {
   const { products, isLoading } = useSelector(
     (state: RootState) => state.products
   );
+  // URL 쿼리 q 읽기
+  const [searchParams] = useSearchParams();
+  const q = (searchParams.get("q") || "").trim();
 
   useEffect(() => {
-    dispatch(fetchProducts());
-  }, [dispatch]);
+    if (q) {
+      dispatch(searchProductsAi(q));
+    } else {
+      dispatch(fetchProducts());
+    }
+  }, [dispatch, q]);
 
   return (
     <div className="container mx-auto px-4 py-8">

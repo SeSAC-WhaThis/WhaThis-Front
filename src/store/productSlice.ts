@@ -152,6 +152,20 @@ export const fetchProducts = createAsyncThunk<Product[]>(
   }
 );
 
+// AI 검색 API 호출
+export const searchProductsAi = createAsyncThunk<Product[], string>(
+  "products/searchProductsAi",
+  async (query) => {
+    const response = await axiosInstance.post("/ai/search", { query });
+    const data = response.data;
+
+    if (Array.isArray(data)) return data;
+    if (data && Array.isArray(data.data)) return data.data;
+    if (data && Array.isArray(data.result)) return data.result;
+    return [];
+  }
+);
+
 interface ProductState {
   products: Product[];
   myProducts: Product[];
@@ -256,6 +270,19 @@ const productSlice = createSlice({
       .addCase(createProduct.rejected, (state, action) => {
         state.isLoading = false;
         state.error = (action.payload as string) || "상품 생성에 실패했습니다.";
+      })
+      // AI 검색
+      .addCase(searchProductsAi.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(searchProductsAi.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.products = Array.isArray(action.payload) ? action.payload : [];
+      })
+      .addCase(searchProductsAi.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || "검색에 실패했습니다.";
       });
   },
 });

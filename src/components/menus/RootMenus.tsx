@@ -26,12 +26,22 @@ export default function RootMenus() {
     navigate(PATH.MAIN);
   };
 
+  //검색창 입력시 q 쿼리 파라미터로 /funding 요청
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key !== "Enter") return;
+    const q = keyword.trim();
+    if (!q) {
+      navigate(PATH.PRODUCT.FUNDINGPAGE);
+      return;
+    }
+    navigate(`${PATH.PRODUCT.FUNDINGPAGE}?q=${encodeURIComponent(q)}`);
+  };
+
   // 프로필 이미지 없을 때 기본 이미지
   const profileImgSrc = user?.profileImageUrl || "/default-avatar.png";
 
   const linkClass = ({ isActive }: { isActive: boolean }) =>
-    `text-[18px] font-medium transition-colors ${
-      isActive ? "text-[rgb(231,249,249)] active" : "text-black"
+    `text-[18px] font-medium transition-colors ${isActive ? "text-[rgb(231,249,249)] active" : "text-black"
     }`;
 
   return (
@@ -63,6 +73,7 @@ export default function RootMenus() {
                 <input
                   value={keyword}
                   onChange={(e) => setKeyword(e.target.value)}
+                  onKeyDown={handleSearchKeyDown}
                   placeholder="검색"
                   className="w-65 md:w-[320px] h-11 rounded-full bg-gray-100 px-5 text-[18px] text-black placeholder:text-gray-500 outline-none"
                 />
