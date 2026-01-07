@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import ProductList from "../../components/products/ProductList";
 import { fetchMyProducts } from "../../store/productSlice";
 import LikeProduct from "../../components/profile/LikeProduct";
+import MyFunding from "../../components/profile/MyFunding";
 import type { RootState } from "../../store";
 import type { ThunkDispatch } from "@reduxjs/toolkit";
 import { PATH } from "../../constants/path";
@@ -106,16 +107,7 @@ const ProfilePage: React.FC = () => {
             )}
           </div>
         )}
-        {activeTab === "funding" && (
-          <div>
-            <h2 className="text-2xl font-bold mb-6 border-b pb-4">
-              내 펀딩 내역
-            </h2>
-            <div className="text-gray-500 py-8 text-center">
-              참여한 펀딩 내역이 없습니다.
-            </div>
-          </div>
-        )}
+        {activeTab === "funding" && <MyFunding />}
         {activeTab === "liked" && <LikeProduct />}
       </div>
     </div>
