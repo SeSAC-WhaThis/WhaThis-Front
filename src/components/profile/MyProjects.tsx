@@ -75,7 +75,7 @@ const MyProjects = () => {
   const handleCardClick = async (productSummary: any) => {
     try {
       const action = await dispatch(fetchProductDetail(productSummary.id));
-      
+
       if (fetchProductDetail.fulfilled.match(action)) {
         const product = action.payload;
         setSelectedProduct(product);
@@ -85,7 +85,9 @@ const MyProjects = () => {
           description: product.description || "",
           categoryId: product.category?.id || 0,
           price: product.price ? product.price.toLocaleString() : "",
-          goalAmount: product.goalAmount ? product.goalAmount.toLocaleString() : "",
+          goalAmount: product.goalAmount
+            ? product.goalAmount.toLocaleString()
+            : "",
           inventory: product.inventory || 0,
           startDate: product.startDate ? product.startDate.split("T")[0] : "",
           endDate: product.endDate ? product.endDate.split("T")[0] : "",
@@ -305,14 +307,14 @@ const MyProjects = () => {
                         {product.title}
                       </h3>
                       <div className="text-sm text-gray-500 mb-1">
-                        목표금액: {product.goalAmount.toLocaleString()}원
+                        목표금액: {(product.goalAmount || 0).toLocaleString()}원
                       </div>
                       <div className="flex items-end gap-2">
                         <span className="text-xl font-bold text-[#00cfcf]">
                           {achieveRate}%
                         </span>
                         <span className="text-sm font-medium text-gray-700">
-                          {product.currentAmount.toLocaleString()}원 달성
+                          {(product.currentAmount || 0).toLocaleString()}원 달성
                         </span>
                       </div>
                     </div>
@@ -605,7 +607,7 @@ const MyProjects = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
           <div className="bg-white rounded-lg p-6 w-full max-w-lg shadow-xl max-h-[80vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4 border-b pb-2">
-              <h3 className="text-xl font-bold text-gray-900">실구매자 목록</h3>
+              <h3 className="text-xl font-bold text-gray-900">펀딩유저 목록</h3>
               <button
                 onClick={() => setIsBuyersModalOpen(false)}
                 className="text-gray-500 hover:text-gray-700"
@@ -660,7 +662,7 @@ const MyProjects = () => {
                     </div>
                     <div className="text-right">
                       <div className="font-bold text-[#00cfcf]">
-                        {buyer.totalAmount.toLocaleString()}원
+                        {(buyer.totalAmount || 0).toLocaleString()}원
                       </div>
                       <div className="text-xs text-gray-500">
                         {buyer.quantity}개 구매

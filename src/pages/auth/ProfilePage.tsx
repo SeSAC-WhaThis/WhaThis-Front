@@ -62,7 +62,7 @@ const ProfilePage: React.FC = () => {
             <h2 className="text-xl font-bold text-gray-900 group-hover:text-[#00cfcf] transition-colors">
               {nickname}
             </h2>
-            <span className="text-xs text-gray-400 group-hover:text-[#00cfcf] transition-colors">
+            <span className="text-lg text-gray-400 group-hover:text-[#00cfcf] transition-colors">
               ✎
             </span>
           </div>
