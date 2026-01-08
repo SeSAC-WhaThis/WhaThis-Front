@@ -80,7 +80,7 @@ const MyProjects = () => {
         const product = action.payload;
         setSelectedProduct(product);
         setEditFormData({
-          brn: user?.brn || product.brn || "",
+          brn: user?.brn || product.seller?.brn || product.brn || "",
           title: product.title,
           description: product.description || "",
           categoryId: product.category?.id || 0,
