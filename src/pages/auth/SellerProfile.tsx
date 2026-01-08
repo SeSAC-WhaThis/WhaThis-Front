@@ -66,10 +66,10 @@ const SellerProfile = () => {
         setProfile((prev) =>
           prev
             ? {
-                ...prev,
-                following: false,
-                followerCount: Math.max(0, prev.followerCount - 1),
-              }
+              ...prev,
+              following: false,
+              followerCount: Math.max(0, prev.followerCount - 1),
+            }
             : null
         );
       } else {
@@ -78,10 +78,10 @@ const SellerProfile = () => {
         setProfile((prev) =>
           prev
             ? {
-                ...prev,
-                following: true,
-                followerCount: prev.followerCount + 1,
-              }
+              ...prev,
+              following: true,
+              followerCount: prev.followerCount + 1,
+            }
             : null
         );
       }
@@ -185,19 +185,19 @@ const SellerProfile = () => {
             </div>
           </div>
         </div>
-
-        <div>
-          <button
-            onClick={handleFollow}
-            className={`px-8 py-2.5 rounded-lg font-semibold transition-all duration-200 ${
-              profile.following
-                ? "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                : "bg-[#00cfcf] text-white hover:bg-[#00b0b0] shadow-md hover:shadow-lg"
-            }`}
-          >
-            {profile.following ? "팔로잉" : "팔로우"}
-          </button>
-        </div>
+        {user?.id !== profile.id && (
+          <div>
+            <button
+              onClick={handleFollow}
+              className={`px-8 py-2.5 rounded-lg font-semibold transition-all duration-200 ${profile.following
+                  ? "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  : "bg-[#00cfcf] text-white hover:bg-[#00b0b0] shadow-md hover:shadow-lg"
+                }`}
+            >
+              {profile.following ? "팔로잉" : "팔로우"}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* 상품 목록 섹션 */}
