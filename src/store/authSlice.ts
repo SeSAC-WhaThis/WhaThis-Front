@@ -166,9 +166,10 @@ export const updateProfile = createAsyncThunk<
   { rejectValue: string }
 >("auth/updateProfile", async (userData, { rejectWithValue }) => {
   try {
-    const response = await axiosInstance.patch("/users/profile", userData);
-    // 응답 데이터 구조에 따라 response.data 또는 response.data.data 등을 반환
-    return response.data.user || response.data.data || response.data;
+    //프로필 수정하면, 변경정보 조회
+    await axiosInstance.patch("/users/profile", userData);
+    const profileResponse = await axiosInstance.get("/users/profile");
+    return profileResponse.data.data || profileResponse.data;
   } catch (error: any) {
     return rejectWithValue(error.response?.data?.message ?? "프로필 수정 실패");
   }

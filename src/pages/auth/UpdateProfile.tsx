@@ -5,6 +5,7 @@ import { RootState, AppDispatch } from "../../store";
 import axiosInstance from "../../api/axiosInstance";
 import { PATH } from "../../constants/path";
 import defaultavatar from "../../assets/icons/defaultavatar.png";
+import { updateProfile as updateProfileAction } from "../../store/authSlice";
 
 interface UpdateProfileProps {
   onCancel?: () => void;
@@ -102,7 +103,7 @@ const UpdateProfile = ({ onCancel, onSuccess }: UpdateProfileProps) => {
     };
 
     try {
-      await axiosInstance.patch("/users/profile", submitData);
+      await dispatch(updateProfileAction(submitData)).unwrap();
       alert("프로필이 수정되었습니다.");
       if (onSuccess) {
         onSuccess();
