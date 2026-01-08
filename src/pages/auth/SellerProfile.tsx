@@ -66,10 +66,10 @@ const SellerProfile = () => {
         setProfile((prev) =>
           prev
             ? {
-              ...prev,
-              following: false,
-              followerCount: Math.max(0, prev.followerCount - 1),
-            }
+                ...prev,
+                following: false,
+                followerCount: Math.max(0, prev.followerCount - 1),
+              }
             : null
         );
       } else {
@@ -78,10 +78,10 @@ const SellerProfile = () => {
         setProfile((prev) =>
           prev
             ? {
-              ...prev,
-              following: true,
-              followerCount: prev.followerCount + 1,
-            }
+                ...prev,
+                following: true,
+                followerCount: prev.followerCount + 1,
+              }
             : null
         );
       }
@@ -164,12 +164,7 @@ const SellerProfile = () => {
               </div>
               <div className="text-sm text-gray-500">팔로워</div>
             </div>
-            <div className="text-center">
-              <div className="text-xl font-bold text-gray-900">
-                {profile.ratingAvg.toFixed(1)}
-              </div>
-              <div className="text-sm text-gray-500">평점</div>
-            </div>
+
             <div className="text-center">
               <div className="text-xl font-bold text-gray-900">
                 {new Intl.NumberFormat("ko-KR", {
@@ -177,7 +172,10 @@ const SellerProfile = () => {
                   maximumFractionDigits: 1,
                 }).format(
                   profile.products.length > 0
-                    ? profile.products.reduce((sum, p) => sum + p.currentAmount, 0)
+                    ? profile.products.reduce(
+                        (sum, p) => sum + p.currentAmount,
+                        0
+                      )
                     : 0
                 )}
               </div>
@@ -189,10 +187,11 @@ const SellerProfile = () => {
           <div>
             <button
               onClick={handleFollow}
-              className={`px-8 py-2.5 rounded-lg font-semibold transition-all duration-200 ${profile.following
+              className={`px-8 py-2.5 rounded-lg font-semibold transition-all duration-200 ${
+                profile.following
                   ? "bg-gray-100 text-gray-600 hover:bg-gray-200"
                   : "bg-[#00cfcf] text-white hover:bg-[#00b0b0] shadow-md hover:shadow-lg"
-                }`}
+              }`}
             >
               {profile.following ? "팔로잉" : "팔로우"}
             </button>
