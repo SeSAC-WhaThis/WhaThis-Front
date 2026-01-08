@@ -38,7 +38,11 @@ const MyFunding = () => {
       try {
         const response = await axiosInstance.get("/orders/my");
         if (response.data.success) {
-          setOrders(response.data.data);
+          // 'PENDING' (결제 대기) 상태인 주문은 제외하고 저장
+          const filteredOrders = response.data.data.filter(
+            (order: Order) => order.orderStatus !== "PENDING"
+          );
+          setOrders(filteredOrders);
         }
       } catch (error) {
         console.error("내 펀딩 내역 조회 실패:", error);

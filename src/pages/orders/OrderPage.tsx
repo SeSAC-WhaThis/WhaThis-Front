@@ -95,7 +95,7 @@ const OrderPage: React.FC = () => {
 
       if (verifyRes.data.success) {
         alert("결제가 완료되었습니다!");
-        navigate(PATH.AUTH.PROFILE);
+        navigate(PATH.AUTH.PROFILE, { state: { tab: "funding" } });
       } else {
         alert("결제 검증 실패: 관리자에게 문의하세요.");
       }
@@ -110,63 +110,124 @@ const OrderPage: React.FC = () => {
   if (!productId) return null;
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-3xl">
-      <h1 className="text-3xl font-bold mb-8">주문서 작성</h1>
-
-      <div className="flex gap-4 border p-4 rounded-lg mb-8">
-        <img
-          src={thumbnailImageUrl}
-          alt={productTitle}
-          className="w-24 h-24 object-cover rounded"
-        />
-        <div>
-          <h3 className="font-bold text-lg">{productTitle}</h3>
-          <p className="text-gray-600">
-            {quantity}개 / {totalAmount.toLocaleString()}원
-          </p>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-xl w-full bg-white shadow-xl rounded-2xl p-8 transform transition-all">
+        {/* 헤더 영역 */}
+        <div className="flex items-center mb-8 relative">
+          <button
+            onClick={() => navigate(-1)}
+            className="absolute left-0 text-gray-400 hover:text-gray-600 transition-colors p-2 -ml-2"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+          </button>
+          <h1 className="text-2xl font-bold text-center w-full text-gray-900">
+            주문/결제
+          </h1>
         </div>
-      </div>
 
-      <div className="mb-8">
-        <h2 className="text-xl font-bold mb-4">배송지 정보</h2>
-        <div className="flex flex-col gap-4">
-          <input
-            type="text"
-            placeholder="수령인 이름"
-            value={receiverName}
-            onChange={(e) => setReceiverName(e.target.value)}
-            className="border p-3 rounded"
+        {/* 상품 정보 요약 */}
+        <div className="bg-gray-50 p-5 rounded-xl mb-8 flex gap-5 items-center shadow-sm">
+          <img
+            src={thumbnailImageUrl}
+            alt={productTitle}
+            className="w-20 h-20 object-cover rounded-lg shadow-sm flex-shrink-0"
           />
-          <input
-            type="text"
-            placeholder="연락처"
-            value={receiverPhone}
-            onChange={(e) => setReceiverPhone(e.target.value)}
-            className="border p-3 rounded"
-          />
-          <input
-            type="text"
-            placeholder="주소"
-            value={receiverAddress}
-            onChange={(e) => setReceiverAddress(e.target.value)}
-            className="border p-3 rounded"
-          />
-          <input
-            type="text"
-            placeholder="배송 요청사항"
-            value={requestNote}
-            onChange={(e) => setRequestNote(e.target.value)}
-            className="border p-3 rounded"
-          />
+          <div className="flex flex-col justify-center overflow-hidden">
+            <h3 className="font-bold text-gray-900 text-lg truncate mb-1">
+              {productTitle}
+            </h3>
+            <div className="text-sm text-gray-500">
+              <span className="font-medium text-gray-700">{quantity}개</span>
+              <span className="mx-2">|</span>
+              <span className="font-bold text-[#00cfcf]">
+                {totalAmount.toLocaleString()}원
+              </span>
+            </div>
+          </div>
         </div>
-      </div>
 
-      <button
-        onClick={handlePayment}
-        className="w-full bg-[#00cfcf] text-white py-4 rounded-lg text-xl font-bold hover:bg-[#00afaf]"
-      >
-        {totalAmount.toLocaleString()}원 결제하기
-      </button>
+        {/* 배송지 정보 입력 */}
+        <div className="mb-8 space-y-5">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-lg font-bold text-gray-900">배송지 정보</h2>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                수령인
+              </label>
+              <input
+                type="text"
+                placeholder="이름을 입력하세요"
+                value={receiverName}
+                onChange={(e) => setReceiverName(e.target.value)}
+                className="w-full border border-gray-200 p-3 rounded-lg text-sm focus:ring-2 focus:ring-[#00cfcf] focus:border-transparent outline-none transition-all bg-white hover:border-gray-300"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                연락처
+              </label>
+              <input
+                type="text"
+                placeholder="010-0000-0000"
+                value={receiverPhone}
+                onChange={(e) => setReceiverPhone(e.target.value)}
+                className="w-full border border-gray-200 p-3 rounded-lg text-sm focus:ring-2 focus:ring-[#00cfcf] focus:border-transparent outline-none transition-all bg-white hover:border-gray-300"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                주소
+              </label>
+              <input
+                type="text"
+                placeholder="배송 받을 주소를 입력하세요"
+                value={receiverAddress}
+                onChange={(e) => setReceiverAddress(e.target.value)}
+                className="w-full border border-gray-200 p-3 rounded-lg text-sm focus:ring-2 focus:ring-[#00cfcf] focus:border-transparent outline-none transition-all bg-white hover:border-gray-300"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                배송 요청사항
+              </label>
+              <input
+                type="text"
+                placeholder="예: 문 앞에 놓아주세요"
+                value={requestNote}
+                onChange={(e) => setRequestNote(e.target.value)}
+                className="w-full border border-gray-200 p-3 rounded-lg text-sm focus:ring-2 focus:ring-[#00cfcf] focus:border-transparent outline-none transition-all bg-white hover:border-gray-300"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* 결제 버튼 */}
+        <button
+          onClick={handlePayment}
+          className="w-full bg-[#00cfcf] text-white py-4 rounded-xl text-lg font-bold shadow-md hover:bg-[#00afaf] hover:shadow-lg transform active:scale-[0.99] transition-all duration-200 flex items-center justify-center gap-2"
+        >
+          <span>{totalAmount.toLocaleString()}원 결제하기</span>
+        </button>
+      </div>
     </div>
   );
 };

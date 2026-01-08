@@ -31,7 +31,10 @@ const SignUp = () => {
   };
 
   const validatePassword = (password: string) => {
-    return password.length >= 8;
+    // 영문, 숫자, 특수문자 포함 8자 이상
+    const regex =
+      /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+    return regex.test(password);
   };
 
   // --- 폼 제출 핸들러 ---
@@ -48,7 +51,8 @@ const SignUp = () => {
     if (!isNameValid) setNameError("이름을 입력해주세요.");
     if (!isNicknameValid) setNicknameError("닉네임을 입력해주세요.");
     if (!isEmailValid) setEmailError("이메일 형식이 올바르지 않습니다.");
-    if (!isPasswordValid) setPasswordError("비밀번호는 8자 이상이어야 합니다.");
+    if (!isPasswordValid)
+      setPasswordError("영문, 숫자, 특수문자 포함하여 8자 이상이여야 합니다.");
     if (!isPasswordConfirmValid)
       setPasswordConfirmError("비밀번호가 일치하지 않습니다.");
 
@@ -146,13 +150,15 @@ const SignUp = () => {
           <div className="input-group">
             <input
               type="password"
-              placeholder="비밀번호 (8자 이상)"
+              placeholder="비밀번호 (영문, 숫자, 특수문자 포함 8자 이상)"
               value={password}
               onChange={(e) => {
                 const newPassword = e.target.value;
                 setPassword(newPassword);
                 if (newPassword && !validatePassword(newPassword)) {
-                  setPasswordError("비밀번호는 8자 이상이어야 합니다.");
+                  setPasswordError(
+                    "영문, 숫자, 특수문자 포함하여 8자 이상이여야 합니다."
+                  );
                 } else {
                   setPasswordError("");
                 }

@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { Product } from "../../store/productSlice";
+import { RootState } from "../../store";
 import { CiHeart } from "react-icons/ci";
 import { FaHeart } from "react-icons/fa";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -115,6 +117,8 @@ const FundingDetail: React.FC<FundingDetailProps> = ({ product }) => {
     }
   };
 
+  const { user } = useSelector((state: RootState) => state.auth);
+
   // 판매자 정보 처리
   const sellerName =
     typeof product.seller === "object" && product.seller !== null
@@ -128,6 +132,13 @@ const FundingDetail: React.FC<FundingDetailProps> = ({ product }) => {
     typeof product.seller === "object" && product.seller !== null
       ? (product.seller as any).id
       : 999; // 더미 데이터인 경우 임의의 ID 사용
+
+  // 펀딩하기 버튼 활성화 여부
+  // 1) 판매자가 본인이면 비활성화
+  // 2) 펀딩 기간이 종료되었으면(daysLeft <= 0) 비활성화
+  const isSeller = user?.id === sellerId;
+  const isEnded = daysLeft <= 0;
+  const isFundingDisabled = isSeller || isEnded;
 
   return (
     <div className="flex flex-col">
@@ -152,12 +163,12 @@ const FundingDetail: React.FC<FundingDetailProps> = ({ product }) => {
                 프로젝트 스토리
               </h2>
               <p></p>
-              <div className="rounded-lg bg-gray-100 p-3">
+              <div className="rounded-lg bg-gray-100 p-3 mb-4">
                 <div className="flex items-center gap-1 mb-1 text-sm font-bold text-gray-800">
                   <IoMdInformationCircle size={14} />
                   <span>구매 전 반드시 확인하세요!</span>
                 </div>
-                <div className="text-sm text-gray-600 leading-relaxed pl-1">
+                <div className="text-sm text-gray-600 leading-relaxed pl-1 ">
                   • 아래 스토리 내용은 이전 펀딩 진행 시 작성된 내용입니다.
                   <br />• 상품 금액은 스토리 상이 아닌 구매하기 버튼을 클릭해서
                   상품 선택 후 확인해 주세요.
@@ -183,7 +194,7 @@ const FundingDetail: React.FC<FundingDetailProps> = ({ product }) => {
         </div>
 
         {/* 오른쪽: 상품 정보 (sticky) */}
-        <div className="w-full md:w-2/5 md:sticky md:top-24 md:self-start">
+        <div className="w-full md:w-2/5 md:sticky md:top-0 md:self-start">
           <div className="p-4 flex flex-col gap-3 border border-gray-100 rounded-lg bg-white">
             {/* 카테고리 & 타입 */}
             <div className="text-sm font-medium text-gray-500 border-b border-gray-100 pb-4">
@@ -250,7 +261,7 @@ const FundingDetail: React.FC<FundingDetailProps> = ({ product }) => {
             </div>
 
             {/* 버튼 그룹 */}
-            <div className="flex gap-3 mt-4">
+            <div className="flex gap-3 mt-2">
               <button
                 onClick={handleLikeClick}
                 className={`w-16 h-16 border border-gray-300 rounded-md hover:bg-gray-100 transition-all duration-300 flex flex-col items-center justify-center relative ${
@@ -262,16 +273,25 @@ const FundingDetail: React.FC<FundingDetailProps> = ({ product }) => {
                 <span className="text-sm font-medium">{likeCount}</span>
               </button>
               <button
-                className="flex-1 bg-[#00cfcf] text-white rounded-md h-16 hover:bg-[#00afaf] transition-colors font-bold text-lg"
+                className={`flex-1 text-white rounded-md h-16 transition-colors font-bold text-lg ${
+                  isFundingDisabled
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-[#00cfcf] hover:bg-[#00afaf]"
+                }`}
                 onClick={handleFundingClick}
+                disabled={isFundingDisabled}
               >
-                펀딩하기
+                {isSeller
+                  ? "본인 프로젝트에 펀딩할 수 없습니다"
+                  : isEnded
+                  ? "아직 진행중이 아닙니다."
+                  : "펀딩하기"}
               </button>
             </div>
 
             {/* 판매자 프로필 섹션 */}
             <div
-              className="flex items-center gap-4 mt-6 p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-4 mt-2 p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
               onClick={() => navigate(PATH.AUTH.SELLER_PROFILE(sellerId))}
             >
               <img

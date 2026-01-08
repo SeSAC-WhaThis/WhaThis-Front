@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
+import { useLocation } from "react-router-dom";
 import type { RootState } from "../../store";
 import defaultavatar from "../../assets/icons/defaultavatar.png";
 import MyProjects from "../../components/profile/MyProjects";
@@ -7,12 +8,29 @@ import MyFunding from "../../components/profile/MyFunding";
 import UpdateProfile from "./UpdateProfile";
 import FollowList from "../../components/profile/FollowList";
 import LikeProduct from "../../components/profile/LikeProduct";
+import Unsubscribe from "../../components/profile/Unsubscribe";
 
 const ProfilePage: React.FC = () => {
   const { user } = useSelector((state: RootState) => state.auth);
+  const location = useLocation();
+  const initialTab = location.state?.tab || "project";
+
   const [activeTab, setActiveTab] = useState<
-    "project" | "funding" | "update" | "following" | "follower" | "liked"
-  >("project");
+    | "project"
+    | "funding"
+    | "update"
+    | "following"
+    | "follower"
+    | "liked"
+    | "unsubscribe"
+  >(initialTab);
+
+  // location.state가 변경될 때도 탭 업데이트 (선택 사항이지만 안전하게)
+  useEffect(() => {
+    if (location.state?.tab) {
+      setActiveTab(location.state.tab);
+    }
+  }, [location.state]);
 
   if (!user) {
     return <div className="p-8 text-center">로그인이 필요한 페이지입니다.</div>;
@@ -112,6 +130,16 @@ const ProfilePage: React.FC = () => {
           >
             프로필 수정
           </button>
+          <button
+            className={`p-4 text-left transition-colors ${
+              activeTab === "unsubscribe"
+                ? "bg-gray-100 font-bold text-[#00cfcf]"
+                : "hover:bg-gray-50 text-gray-700"
+            }`}
+            onClick={() => setActiveTab("unsubscribe")}
+          >
+            회원 탈퇴
+          </button>
         </div>
       </div>
 
@@ -122,6 +150,7 @@ const ProfilePage: React.FC = () => {
         {activeTab === "following" && <FollowList type="following" />}
         {activeTab === "follower" && <FollowList type="follower" />}
         {activeTab === "liked" && <LikeProduct />}
+        {activeTab === "unsubscribe" && <Unsubscribe />}
         {activeTab === "update" && (
           <UpdateProfile
             onCancel={() => setActiveTab("project")}

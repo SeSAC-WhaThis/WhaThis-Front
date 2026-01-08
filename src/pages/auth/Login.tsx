@@ -107,7 +107,7 @@ const Login = () => {
                 checked={rememberEmail}
                 onChange={(e) => setRememberEmail(e.target.checked)}
               />
-              <span>로그인 유지</span>
+              <span>이메일 저장</span>
             </label>
           </div>
           <button
@@ -134,14 +134,6 @@ const Login = () => {
             >
               <img src={kakaoLoginImg} alt="카카오" />
               <span>카카오 로그인</span>
-            </button>
-            <button type="button" className="social-text-btn naver">
-              <img src={naverLoginImg} alt="네이버" />
-              <span>네이버 로그인</span>
-            </button>
-            <button type="button" className="social-text-btn google">
-              <img src={googleIcon} alt="구글" />
-              <span>구글 로그인</span>
             </button>
           </div>
         </div>

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import MainBanner from "../components/common/MainBanner";
 import ProductList from "../components/products/ProductList";
 import { fetchProducts, fetchCategories } from "../store/productSlice";
@@ -66,11 +66,17 @@ const MainPage: React.FC = () => {
           ref={scrollRef}
           className="flex gap-6 overflow-x-auto scrollbar-hide flex-nowrap px-12 w-full"
         >
+          <button
+            onClick={() => navigate(PATH.PRODUCT.FUNDINGPAGE)}
+            className="py-6 px-[8px] bg-white text-gray-700 text-sm font-medium whitespace-nowrap transition-all flex-shrink-0 border-b-2 border-transparent hover:border-black"
+          >
+            전체
+          </button>
           {categories.map((category) => (
             <button
               key={category.id}
               onClick={() => handleCategoryClick(category.id)}
-              className="py-6 px-[10px] bg-white text-gray-700 text-sm font-medium whitespace-nowrap transition-all flex-shrink-0 border-b-2 border-transparent hover:border-black"
+              className="py-6 px-[8px] bg-white text-gray-700 text-sm font-medium whitespace-nowrap transition-all flex-shrink-0 border-b-2 border-transparent hover:border-black"
             >
               {category.name}
             </button>

@@ -11,6 +11,7 @@ import FeedPage from "../../pages/products/FollowingFeedPage";
 import { PATH } from "../../constants/path";
 import { Component } from "react";
 import OrderPage from "../../pages/orders/OrderPage";
+import PrivateRoute from "../../components/common/PrivateRoute";
 
 const rootRoutes = [
   {
@@ -21,10 +22,10 @@ const rootRoutes = [
         index: true,
         Component: MainPage,
       },
-      {
-        path: PATH.MY_PAGE,
-        Component: MyPage,
-      },
+      // {
+      //   path: PATH.MY_PAGE,
+      //   Component: MyPage,
+      // },
       {
         path: PATH.PRODUCT.FUNDINGPAGE,
         Component: FundingPage,
@@ -38,24 +39,30 @@ const rootRoutes = [
         Component: ProductDetailPage,
       },
       {
-        path: PATH.AUTH.PROFILE,
-        Component: ProfilePage,
-      },
-      {
-        path: PATH.PRODUCT.CREATE,
-        Component: ProductCreatePage,
-      },
-      {
         path: "/users/profile/:sellerId",
         Component: SellerProfile,
       },
       {
-        path: PATH.PRODUCT.ORDER,
-        Component: OrderPage,
-      },
-      {
         path: PATH.PRODUCT.FEED,
         Component: FeedPage,
+      },
+      // Protected Routes
+      {
+        Component: PrivateRoute,
+        children: [
+          {
+            path: PATH.AUTH.PROFILE,
+            Component: ProfilePage,
+          },
+          {
+            path: PATH.PRODUCT.CREATE,
+            Component: ProductCreatePage,
+          },
+          {
+            path: PATH.PRODUCT.ORDER,
+            Component: OrderPage,
+          },
+        ],
       },
     ],
   },

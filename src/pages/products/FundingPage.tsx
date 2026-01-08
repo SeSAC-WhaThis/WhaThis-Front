@@ -74,11 +74,17 @@ const FundingPage: React.FC = () => {
           ref={scrollRef}
           className="flex gap-6 overflow-x-auto scrollbar-hide flex-nowrap px-12 w-full"
         >
+          <button
+            onClick={() => navigate(PATH.PRODUCT.FUNDINGPAGE)}
+            className="py-6 px-[8px] bg-white text-gray-700 text-sm font-medium whitespace-nowrap transition-all flex-shrink-0 border-b-2 border-transparent hover:border-black"
+          >
+            전체
+          </button>
           {categories.map((category) => (
             <button
               key={category.id}
               onClick={() => handleCategoryClick(category.id)}
-              className={`py-6 px-[10px] bg-white text-sm font-medium whitespace-nowrap transition-all flex-shrink-0 border-b-2 ${
+              className={`py-6 px-[8px] bg-white text-sm font-medium whitespace-nowrap transition-all flex-shrink-0 border-b-2 ${
                 categoryId && Number(categoryId) === category.id
                   ? "border-black text-black font-bold"
                   : "border-transparent text-gray-700 hover:border-black"

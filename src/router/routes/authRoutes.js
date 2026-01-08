@@ -3,6 +3,7 @@ import KakaoCallback from "../../pages/auth/KakaoCallback";
 import SignUp from "../../pages/auth/SignUp";
 import UpdateProfile from "../../pages/auth/UpdateProfile";
 import { PATH } from "../../constants/path";
+import PrivateRoute from "../../components/common/PrivateRoute";
 
 const authRoutes = [
   {
@@ -18,8 +19,13 @@ const authRoutes = [
     Component: SignUp,
   },
   {
-    path: PATH.AUTH.PROFILE_UPDATE,
-    Component: UpdateProfile,
+    Component: PrivateRoute,
+    children: [
+      {
+        path: PATH.AUTH.PROFILE_UPDATE,
+        Component: UpdateProfile,
+      },
+    ],
   },
 ];
 
