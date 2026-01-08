@@ -96,7 +96,7 @@ const UpdateProfile = ({ onCancel, onSuccess }: UpdateProfileProps) => {
 
     const submitData = {
       name: formData.name,
-      nickname: formData.nickname,
+      nickname: formData.nickname !== user?.nickname ? formData.nickname : null,
       phoneNumber: formData.phoneNumber,
       address: formData.address,
       profileImageUrl: user?.profileImageUrl,
