@@ -9,6 +9,7 @@ import UpdateProfile from "./UpdateProfile";
 import FollowList from "../../components/profile/FollowList";
 import LikeProduct from "../../components/profile/LikeProduct";
 import Unsubscribe from "../../components/profile/Unsubscribe";
+import UpdatePassword from "./UpdatePassword";
 
 const ProfilePage: React.FC = () => {
   const { user } = useSelector((state: RootState) => state.auth);
@@ -22,6 +23,7 @@ const ProfilePage: React.FC = () => {
     | "following"
     | "follower"
     | "liked"
+    | "password"
     | "unsubscribe"
   >(initialTab);
 
@@ -71,71 +73,73 @@ const ProfilePage: React.FC = () => {
         {/* 메뉴 */}
         <div className="flex flex-col border border-gray-200 rounded-lg shadow-sm overflow-hidden bg-white">
           <button
-            className={`p-4 text-left transition-colors ${
-              activeTab === "project"
-                ? "bg-gray-100 font-bold text-[#00cfcf]"
-                : "hover:bg-gray-50 text-gray-700"
-            }`}
+            className={`p-4 text-left transition-colors ${activeTab === "project"
+              ? "bg-gray-100 font-bold text-[#00cfcf]"
+              : "hover:bg-gray-50 text-gray-700"
+              }`}
             onClick={() => setActiveTab("project")}
           >
             프로젝트
           </button>
           <button
-            className={`p-4 text-left transition-colors ${
-              activeTab === "funding"
-                ? "bg-gray-100 font-bold text-[#00cfcf]"
-                : "hover:bg-gray-50 text-gray-700"
-            }`}
+            className={`p-4 text-left transition-colors ${activeTab === "funding"
+              ? "bg-gray-100 font-bold text-[#00cfcf]"
+              : "hover:bg-gray-50 text-gray-700"
+              }`}
             onClick={() => setActiveTab("funding")}
           >
             내 펀딩
           </button>
           <button
-            className={`p-4 text-left transition-colors ${
-              activeTab === "liked"
-                ? "bg-gray-100 font-bold text-[#00cfcf]"
-                : "hover:bg-gray-50 text-gray-700"
-            }`}
+            className={`p-4 text-left transition-colors ${activeTab === "liked"
+              ? "bg-gray-100 font-bold text-[#00cfcf]"
+              : "hover:bg-gray-50 text-gray-700"
+              }`}
             onClick={() => setActiveTab("liked")}
           >
             좋아요 누른 상품
           </button>
           <button
-            className={`p-4 text-left transition-colors ${
-              activeTab === "following"
-                ? "bg-gray-100 font-bold text-[#00cfcf]"
-                : "hover:bg-gray-50 text-gray-700"
-            }`}
+            className={`p-4 text-left transition-colors ${activeTab === "following"
+              ? "bg-gray-100 font-bold text-[#00cfcf]"
+              : "hover:bg-gray-50 text-gray-700"
+              }`}
             onClick={() => setActiveTab("following")}
           >
             팔로잉
           </button>
           <button
-            className={`p-4 text-left transition-colors ${
-              activeTab === "follower"
-                ? "bg-gray-100 font-bold text-[#00cfcf]"
-                : "hover:bg-gray-50 text-gray-700"
-            }`}
+            className={`p-4 text-left transition-colors ${activeTab === "follower"
+              ? "bg-gray-100 font-bold text-[#00cfcf]"
+              : "hover:bg-gray-50 text-gray-700"
+              }`}
             onClick={() => setActiveTab("follower")}
           >
             팔로워
           </button>
           <button
-            className={`p-4 text-left transition-colors ${
-              activeTab === "update"
-                ? "bg-gray-100 font-bold text-[#00cfcf]"
-                : "hover:bg-gray-50 text-gray-700"
-            }`}
+            className={`p-4 text-left transition-colors ${activeTab === "update"
+              ? "bg-gray-100 font-bold text-[#00cfcf]"
+              : "hover:bg-gray-50 text-gray-700"
+              }`}
             onClick={() => setActiveTab("update")}
           >
             프로필 수정
           </button>
           <button
-            className={`p-4 text-left transition-colors ${
-              activeTab === "unsubscribe"
-                ? "bg-gray-100 font-bold text-[#00cfcf]"
-                : "hover:bg-gray-50 text-gray-700"
-            }`}
+            className={`p-4 text-left transition-colors ${activeTab === "password"
+              ? "bg-gray-100 font-bold text-[#00cfcf]"
+              : "hover:bg-gray-50 text-gray-700"
+              }`}
+            onClick={() => setActiveTab("password")}
+          >
+            비밀번호 변경
+          </button>
+          <button
+            className={`p-4 text-left transition-colors ${activeTab === "unsubscribe"
+              ? "bg-gray-100 font-bold text-[#00cfcf]"
+              : "hover:bg-gray-50 text-gray-700"
+              }`}
             onClick={() => setActiveTab("unsubscribe")}
           >
             회원 탈퇴
@@ -153,6 +157,12 @@ const ProfilePage: React.FC = () => {
         {activeTab === "unsubscribe" && <Unsubscribe />}
         {activeTab === "update" && (
           <UpdateProfile
+            onCancel={() => setActiveTab("project")}
+            onSuccess={() => setActiveTab("project")}
+          />
+        )}
+        {activeTab === "password" && (
+          <UpdatePassword
             onCancel={() => setActiveTab("project")}
             onSuccess={() => setActiveTab("project")}
           />
