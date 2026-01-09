@@ -3,7 +3,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { Navigate, useNavigate } from "react-router-dom";
 import MainBanner from "../components/common/MainBanner";
 import ProductList from "../components/products/ProductList";
-import { fetchProducts, fetchCategories } from "../store/productSlice";
+import {
+  fetchProducts,
+  fetchCategories,
+  resetProducts,
+} from "../store/productSlice";
 import type { RootState } from "../store";
 import type { ThunkDispatch } from "@reduxjs/toolkit";
 import { PATH } from "../constants/path";
@@ -11,15 +15,34 @@ import { PATH } from "../constants/path";
 const MainPage: React.FC = () => {
   const dispatch = useDispatch<ThunkDispatch<any, any, any>>();
   const navigate = useNavigate();
-  const { products, categories, isLoading } = useSelector(
+  const { products, categories, isLoading, hasMore, page } = useSelector(
     (state: RootState) => state.products
   );
   const scrollRef = useRef<HTMLDivElement>(null);
+  const observerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    dispatch(fetchProducts());
+    dispatch(resetProducts());
+    dispatch(fetchProducts({ page: 0, size: 12 }));
     dispatch(fetchCategories());
   }, [dispatch]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isLoading) {
+          dispatch(fetchProducts({ page: page + 1, size: 12 }));
+        }
+      },
+      { threshold: 0.5 }
+    );
+
+    if (observerRef.current) observer.observe(observerRef.current);
+
+    return () => {
+      if (observerRef.current) observer.unobserve(observerRef.current);
+    };
+  }, [hasMore, isLoading, page, dispatch]);
 
   // 인기 상품 정렬 (좋아요 순)
   const popularProducts = useMemo(() => {
@@ -115,7 +138,7 @@ const MainPage: React.FC = () => {
 
           {/* 상품 목록 */}
           <section>
-            {isLoading ? (
+            {isLoading && products.length === 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                 {Array.from({ length: 6 }).map((_, index) => (
                   <div key={index} className="animate-pulse">
@@ -126,7 +149,13 @@ const MainPage: React.FC = () => {
                 ))}
               </div>
             ) : (
-              <ProductList products={products} />
+              <>
+                <ProductList products={products} />
+                <div ref={observerRef} className="h-10" />
+                {isLoading && (
+                  <div className="text-center py-4">Loading more...</div>
+                )}
+              </>
             )}
           </section>
         </main>

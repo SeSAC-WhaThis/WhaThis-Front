@@ -5,6 +5,7 @@ import {
   fetchProducts,
   searchProductsAi,
   fetchCategories,
+  resetProducts,
 } from "../../store/productSlice";
 import type { RootState } from "../../store"; // store/index.ts에서 RootState 타입이 export 되어 있다고 가정
 import type { ThunkDispatch } from "@reduxjs/toolkit"; // dispatch 타입 지정을 위해
@@ -15,10 +16,11 @@ const FundingPage: React.FC = () => {
   const dispatch = useDispatch<ThunkDispatch<any, any, any>>();
   const navigate = useNavigate();
   // productSlice에서 정의한 상태를 가져옵니다.
-  const { products, categories, isLoading } = useSelector(
+  const { products, categories, isLoading, hasMore, page } = useSelector(
     (state: RootState) => state.products
   );
   const scrollRef = useRef<HTMLDivElement>(null);
+  const observerRef = useRef<HTMLDivElement>(null);
   // URL 쿼리 q 읽기
   const [searchParams] = useSearchParams();
   const q = (searchParams.get("q") || "").trim();
@@ -29,12 +31,44 @@ const FundingPage: React.FC = () => {
   }, [dispatch]);
 
   useEffect(() => {
+    dispatch(resetProducts());
     if (q) {
       dispatch(searchProductsAi(q));
     } else {
-      dispatch(fetchProducts(categoryId ? Number(categoryId) : undefined));
+      dispatch(
+        fetchProducts({
+          categoryId: categoryId ? Number(categoryId) : undefined,
+          page: 0,
+          size: 12,
+        })
+      );
     }
   }, [dispatch, q, categoryId]);
+
+  useEffect(() => {
+    if (q) return; // 검색 모드일 때는 무한 스크롤 비활성화 (혹은 별도 처리)
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isLoading) {
+          dispatch(
+            fetchProducts({
+              categoryId: categoryId ? Number(categoryId) : undefined,
+              page: page + 1,
+              size: 12,
+            })
+          );
+        }
+      },
+      { threshold: 0.5 }
+    );
+
+    if (observerRef.current) observer.observe(observerRef.current);
+
+    return () => {
+      if (observerRef.current) observer.unobserve(observerRef.current);
+    };
+  }, [hasMore, isLoading, page, dispatch, categoryId, q]);
 
   const handleCategoryClick = (catId: number) => {
     navigate(`${PATH.PRODUCT.FUNDINGPAGE}?category_id=${catId}`);
@@ -106,7 +140,17 @@ const FundingPage: React.FC = () => {
           &gt;
         </button>
       </div>
-      {isLoading ? <div>Loading...</div> : <ProductList products={products} />}
+      {isLoading && products.length === 0 ? (
+        <div>Loading...</div>
+      ) : (
+        <>
+          <ProductList products={products} />
+          {!q && <div ref={observerRef} className="h-10" />}
+          {isLoading && !q && (
+            <div className="text-center py-4">Loading more...</div>
+          )}
+        </>
+      )}
     </div>
   );
 };

@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchMyProducts,
   fetchCategories,
   fetchProductDetail,
+  resetMyProducts,
 } from "../../store/productSlice";
 import { PATH } from "../../constants/path";
 import axiosInstance from "../../api/axiosInstance";
@@ -22,9 +23,13 @@ interface Buyer {
 const MyProjects = () => {
   const dispatch = useDispatch<ThunkDispatch<any, any, any>>();
   const navigate = useNavigate();
-  const { myProducts, isLoading, categories } = useSelector(
-    (state: RootState) => state.products
-  );
+  const {
+    myProducts,
+    isLoading,
+    categories,
+    myProductsHasMore,
+    myProductsPage,
+  } = useSelector((state: RootState) => state.products);
   const { user } = useSelector((state: RootState) => state.auth);
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -33,6 +38,7 @@ const MyProjects = () => {
   // 구매자 목록 모달 상태
   const [buyersList, setBuyersList] = useState<Buyer[]>([]);
   const [isBuyersModalOpen, setIsBuyersModalOpen] = useState(false);
+  const observerRef = useRef<HTMLDivElement>(null);
 
   // 초기 상태
   const [editFormData, setEditFormData] = useState({
@@ -66,11 +72,31 @@ const MyProjects = () => {
   };
 
   useEffect(() => {
-    dispatch(fetchMyProducts());
+    dispatch(resetMyProducts());
+    dispatch(fetchMyProducts({ page: 0, size: 10 }));
     if (categories.length === 0) {
       dispatch(fetchCategories());
     }
-  }, [dispatch, categories.length]);
+  }, [dispatch]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && myProductsHasMore && !isLoading) {
+          dispatch(
+            fetchMyProducts({ page: myProductsPage + 1, size: 10 })
+          );
+        }
+      },
+      { threshold: 0.5 }
+    );
+
+    if (observerRef.current) observer.observe(observerRef.current);
+
+    return () => {
+      if (observerRef.current) observer.unobserve(observerRef.current);
+    };
+  }, [myProductsHasMore, isLoading, myProductsPage, dispatch]);
 
   const handleCardClick = async (productSummary: any) => {
     try {
@@ -355,6 +381,10 @@ const MyProjects = () => {
             );
           })}
         </div>
+      )}
+      <div ref={observerRef} className="h-10" />
+      {isLoading && myProducts.length > 0 && (
+        <div className="text-center py-4">Loading more...</div>
       )}
 
       {/* 수정 모달 */}

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import axiosInstance from "../../api/axiosInstance";
@@ -91,35 +91,65 @@ const LikeParticles = () => (
 const FollowingFeedPage: React.FC = () => {
   const dispatch = useDispatch<ThunkDispatch<any, any, any>>();
   const [products, setProducts] = useState<FeedProduct[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Initial loading handled by fetch
   const [animatingId, setAnimatingId] = useState<number | null>(null);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const observerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchFeed = async () => {
-      try {
-        const response = await axiosInstance.get("/follows/products");
-        if (response.data.success) {
-          // 서버 데이터 매핑: likeCount와 isLiked가 없을 경우 기본값 설정
-          const list = Array.isArray(response.data.data)
-            ? response.data.data
-            : [];
-          const feedData = list.map((item: any) => ({
-            ...item,
-            likeCount: item.likeCount ?? item.like_count ?? 0,
-            isLiked: item.isLiked ?? item.is_liked ?? false,
-          }));
-          setProducts(feedData);
-        }
-      } catch (error) {
-        console.error("피드 조회 실패:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchFeed = async (pageNum: number) => {
+    if (loading) return;
+    try {
+      setLoading(true);
+      const response = await axiosInstance.get("/follows/products", {
+        params: { page: pageNum, size: 5 },
+      });
+      if (response.data.success) {
+        // 서버 데이터 매핑: likeCount와 isLiked가 없을 경우 기본값 설정
+        const data = response.data.data; // PageResponse
+        const list = data.content || [];
+        const feedData = list.map((item: any) => ({
+          ...item,
+          likeCount: item.likeCount ?? item.like_count ?? 0,
+          isLiked: item.isLiked ?? item.is_liked ?? false,
+        }));
 
-    fetchFeed();
+        if (pageNum === 0) {
+          setProducts(feedData);
+        } else {
+          setProducts((prev) => [...prev, ...feedData]);
+        }
+        setHasMore(!data.last);
+        setPage(data.pageNumber);
+      }
+    } catch (error) {
+      console.error("피드 조회 실패:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchFeed(0);
   }, []);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loading) {
+          fetchFeed(page + 1);
+        }
+      },
+      { threshold: 0.5 }
+    );
+
+    if (observerRef.current) observer.observe(observerRef.current);
+
+    return () => {
+      if (observerRef.current) observer.unobserve(observerRef.current);
+    };
+  }, [hasMore, loading, page]);
 
   const handleLike = async (e: React.MouseEvent, productId: number) => {
     e.stopPropagation();
@@ -184,13 +214,14 @@ const FollowingFeedPage: React.FC = () => {
     }
   };
 
-  if (loading) return <div className="text-center py-20">Loading...</div>;
+  if (loading && products.length === 0)
+    return <div className="text-center py-20">Loading...</div>;
 
   return (
     <div className="max-w-[470px] mx-auto py-8">
       <h1 className="text-2xl font-bold mb-6 px-4">피드</h1>
 
-      {products.length === 0 ? (
+      {products.length === 0 && !loading ? (
         <div className="text-center py-20 text-gray-500 bg-white rounded-lg border border-gray-100 mx-4">
           <p className="text-lg font-bold mb-2">새로운 소식이 없습니다.</p>
           <p>
@@ -344,6 +375,8 @@ const FollowingFeedPage: React.FC = () => {
               </div>
             </div>
           ))}
+          <div ref={observerRef} className="h-10" />
+          {loading && <div className="text-center py-4">Loading more...</div>}
         </div>
       )}
     </div>

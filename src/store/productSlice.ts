@@ -49,27 +49,29 @@ export const fetchProductDetail = createAsyncThunk<Product, number>(
 );
 
 // 내 상품 조회 액션
-export const fetchMyProducts = createAsyncThunk<Product[]>(
-  "products/fetchMyProducts",
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await axiosInstance.get("/products/my");
-      const data = response.data;
+export const fetchMyProducts = createAsyncThunk<
+  { products: Product[]; isLast: boolean; page: number },
+  { page: number; size: number }
+>("products/fetchMyProducts", async ({ page, size }, { rejectWithValue }) => {
+  try {
+    const response = await axiosInstance.get("/products/my", {
+      params: { page, size },
+    });
+    const data = response.data.data; // PageResponse
 
-      if (Array.isArray(data)) return data;
-      if (data && Array.isArray(data.data)) return data.data;
-      if (data && Array.isArray(data.result)) return data.result;
-      return [];
-    } catch (error: any) {
-      console.error("내 상품 조회 에러 상세:", error);
-      // 서버에서 보낸 구체적인 에러 메시지 확인
-      if (error.response && error.response.data) {
-        console.error("서버 반환 에러 데이터:", error.response.data);
-      }
-      return rejectWithValue(error.response?.data || "내 상품 조회 실패");
+    return {
+      products: data.content,
+      isLast: data.last,
+      page: data.pageNumber,
+    };
+  } catch (error: any) {
+    console.error("내 상품 조회 에러 상세:", error);
+    if (error.response && error.response.data) {
+      console.error("서버 반환 에러 데이터:", error.response.data);
     }
+    return rejectWithValue(error.response?.data || "내 상품 조회 실패");
   }
-);
+});
 
 // 좋아요한 상품 조회 액션
 export const fetchLikedProducts = createAsyncThunk<Product[]>(
@@ -132,27 +134,27 @@ export const createProduct = createAsyncThunk<Product, FormData>(
 );
 
 // 비동기 액션 생성 (API 호출)
-export const fetchProducts = createAsyncThunk<Product[], number | undefined>(
-  "products/fetchProducts",
-  async (categoryId) => {
-    const response = await axiosInstance.get("/products", {
-      params: categoryId ? { categoryId } : {},
-    });
+export const fetchProducts = createAsyncThunk<
+  { products: Product[]; isLast: boolean; page: number },
+  { categoryId?: number; page: number; size: number }
+>("products/fetchProducts", async ({ categoryId, page, size }) => {
+  const response = await axiosInstance.get("/products", {
+    params: { categoryId, page, size },
+  });
 
-    const data = response.data;
-    let products: any[] = [];
+  const data = response.data.data; // PageResponse
+  const products = data.content.map((product: any) => ({
+    ...product,
+    likeCount: product.likeCount ?? product.like_count ?? 0,
+    isLiked: product.isLiked ?? product.is_liked ?? false,
+  }));
 
-    if (Array.isArray(data)) products = data;
-    else if (data && Array.isArray(data.data)) products = data.data;
-    else if (data && Array.isArray(data.result)) products = data.result;
-
-    return products.map((product) => ({
-      ...product,
-      likeCount: product.likeCount ?? product.like_count ?? 0,
-      isLiked: product.isLiked ?? product.is_liked ?? false,
-    }));
-  }
-);
+  return {
+    products,
+    isLast: data.last,
+    page: data.pageNumber,
+  };
+});
 
 // AI 검색 API 호출
 export const searchProductsAi = createAsyncThunk<Product[], string>(
@@ -176,6 +178,10 @@ interface ProductState {
   selectedProduct: Product | null;
   isLoading: boolean;
   error: string | null;
+  hasMore: boolean;
+  page: number;
+  myProductsHasMore: boolean;
+  myProductsPage: number;
 }
 
 const initialState: ProductState = {
@@ -186,12 +192,27 @@ const initialState: ProductState = {
   selectedProduct: null,
   isLoading: false,
   error: null,
+  hasMore: true,
+  page: 0,
+  myProductsHasMore: true,
+  myProductsPage: 0,
 };
 
 const productSlice = createSlice({
   name: "products",
   initialState,
-  reducers: {},
+  reducers: {
+    resetProducts: (state) => {
+      state.products = [];
+      state.page = 0;
+      state.hasMore = true;
+    },
+    resetMyProducts: (state) => {
+      state.myProducts = [];
+      state.myProductsPage = 0;
+      state.myProductsHasMore = true;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchProducts.pending, (state) => {
@@ -200,8 +221,13 @@ const productSlice = createSlice({
       })
       .addCase(fetchProducts.fulfilled, (state, action) => {
         state.isLoading = false;
-        // API 응답이 배열인지 확인 후 할당 (배열이 아니면 빈 배열 처리)
-        state.products = Array.isArray(action.payload) ? action.payload : [];
+        if (action.payload.page === 0) {
+          state.products = action.payload.products;
+        } else {
+          state.products = [...state.products, ...action.payload.products];
+        }
+        state.hasMore = !action.payload.isLast;
+        state.page = action.payload.page;
       })
       .addCase(fetchProducts.rejected, (state, action) => {
         state.isLoading = false;
@@ -228,7 +254,13 @@ const productSlice = createSlice({
       })
       .addCase(fetchMyProducts.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.myProducts = Array.isArray(action.payload) ? action.payload : [];
+        if (action.payload.page === 0) {
+          state.myProducts = action.payload.products;
+        } else {
+          state.myProducts = [...state.myProducts, ...action.payload.products];
+        }
+        state.myProductsHasMore = !action.payload.isLast;
+        state.myProductsPage = action.payload.page;
       })
       .addCase(fetchMyProducts.rejected, (state, action) => {
         state.isLoading = false;
@@ -288,5 +320,7 @@ const productSlice = createSlice({
       });
   },
 });
+
+export const { resetProducts, resetMyProducts } = productSlice.actions;
 
 export default productSlice.reducer;

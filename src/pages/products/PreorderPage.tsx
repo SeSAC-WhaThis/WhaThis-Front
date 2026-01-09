@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import ProductList from "../../components/products/ProductList";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchProducts } from "../../store/productSlice";
+import { fetchProducts, resetProducts } from "../../store/productSlice";
 import type { RootState } from "../../store";
 import type { ThunkDispatch } from "@reduxjs/toolkit";
 
@@ -15,7 +15,8 @@ const PreorderPage: React.FC = () => {
   const preOrderProducts = products;
 
   useEffect(() => {
-    dispatch(fetchProducts());
+    dispatch(resetProducts());
+    dispatch(fetchProducts({ page: 0, size: 12 }));
   }, [dispatch]);
 
   return (
